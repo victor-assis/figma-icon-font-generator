@@ -1,0 +1,79 @@
+{
+	"name": "figma-icon-font-generator",
+	"version": "1.0.0",
+	"description": "Figma icon font generator plugin",
+	"license": "ISC",
+  "author": {
+    "name": "Victor Assis",
+    "url": "https://github.com/victor-assis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/victor-assis/figma-icon-font-generator"
+  },
+  "keywords": [
+    "SVG",
+    "icons",
+    "creation",
+    "fonts",
+		"figma"
+  ],
+	"scripts": {
+		"start": "webpack --mode=development --watch",
+		"build": "webpack --mode=production",
+		"prettier:format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,json}' "
+	},
+	"dependencies": {
+		"@emotion/react": "^11.9.3",
+		"@emotion/styled": "^11.9.3",
+		"@mui/material": "^5.9.2",
+		"cheerio": "^0.22.0",
+		"file-saver": "^2.0.5",
+		"jszip": "^3.10.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"styled-components": "^5.3.5",
+		"svg2ttf": "^6.0.3",
+		"svgicons2svgfont": "^12.0.0",
+		"ttf2eot": "^2.0.0",
+		"ttf2woff": "^2.0.2",
+		"ttf2woff2": "^3.0.0"
+	},
+	"devDependencies": {
+		"@figma/plugin-typings": "^1.49.0",
+		"@types/file-saver": "^2.0.5",
+		"@types/node": "^18.6.2",
+		"@types/react": "^18.0.15",
+		"@types/react-dom": "^18.0.6",
+		"@types/svg2ttf": "^5.0.1",
+		"@types/svgicons2svgfont": "^10.0.1",
+		"@types/ttf2eot": "^2.0.0",
+		"@types/ttf2woff": "^2.0.2",
+		"@types/ttf2woff2": "^2.0.0",
+		"css-loader": "^5.0.1",
+		"html-webpack-inline-source-plugin": "^0.0.10",
+		"html-webpack-plugin": "^3.2.0",
+		"husky": "^8.0.1",
+		"lint-staged": "^13.0.3",
+		"prettier": "^2.7.1",
+		"sass": "^1.54.0",
+		"sass-loader": "^10.3.1",
+		"style-loader": "^2.0.0",
+		"ts-loader": "^8.0.11",
+		"typescript": "^4.7.4",
+		"url-loader": "^4.1.1",
+		"webpack": "^4.41.4",
+		"webpack-cli": "^3.3.6"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"src/**/*.{js,jsx,ts,tsx,css,json}": [
+			"prettier --write",
+			"git add"
+		]
+	}
+}
