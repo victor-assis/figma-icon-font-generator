@@ -55,7 +55,7 @@ export const generateFonts = (
     }) : [String.fromCharCode(parseInt(curCodepoint, 16))];
   
     if (download) {
-      svgs.file(`${file.name}.svg`, svg);
+      svgs.file(`${matches && matches[2] ? matches[2] : file.name}.svg`, svg);
     }
 
     reader.onload = (e) => {
