@@ -12,3 +12,13 @@ export interface TabPanelProps {
   index: number;
   value: number;
 }
+
+export type IconInformation = {
+  code: string,
+  liga?: string,
+  name: string,
+  ref: string,
+  svg: string,
+  pathData: string,
+  figmaName?: string,
+};

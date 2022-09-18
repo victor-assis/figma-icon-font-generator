@@ -10,6 +10,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { generateFonts } from '../shared/fonts';
 import { TabPanelProps } from '../shared/typings';
+import { generateVetores } from '../shared/vetors';
 
 import './App.scss';
 import FormFontConfig from './FormFontConfig/FormFontConfig';
@@ -57,8 +58,12 @@ const App = ({}) => {
     setIcons(config.json);
   }
 
+  const inputFileUpload = (files) => {
+    generateVetores(files[0], (vectors) => parent.postMessage({pluginMessage: {type: 'createFigmaVetors', vectors}}, '*'));
+  }
+
   useEffect(() => {
-    parent.postMessage({pluginMessage: {type: 'setSvgs', fontsConfig}}, '*');    
+    parent.postMessage({pluginMessage: {type: 'setSvgs', fontsConfig}}, '*');
     parent.postMessage({pluginMessage: {type: 'getFontConfig'}}, '*');
     window.onmessage = (event) => {
       if (!event.data.pluginMessage) { return; }
@@ -105,6 +110,22 @@ const App = ({}) => {
               No selected icon found!
             </Alert>
           ) : memoPreviewIcon}
+
+          <Button
+            variant="outlined"
+            component="label"
+            color="secondary"
+            size="small"
+            sx={{' margin-top': '16px' }}
+          >
+            Upload Font SVG
+            <input
+              type="file"
+              accept=".svg"
+              hidden
+              onChange={(e) => inputFileUpload(e.target.files)}
+            />
+          </Button>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <FormFontConfig onChange={setConfig} form={fontsConfig} />
