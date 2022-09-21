@@ -1,34 +1,52 @@
-import { IconInformation } from "../app/shared/typings";
-
-interface ISerializedSVG {
-  name: string
-  svg: string
-}
+import { IIconInformation, ISerializedSVG } from '../app/shared/typings';
 
 figma.showUI(__html__, {
   width: 350,
-  height: 500
+  height: 500,
 });
 
 figma.ui.onmessage = (msg) => {
   const settings = {
     SerializeSvgs: () => {
       const nodes = figma.currentPage.selection;
-      sendSerializedSelection(nodes, 'downloadFonts', msg.hasLigatura, msg.fontsConfig);
+      void sendSerializedSelection(
+        nodes,
+        'downloadFonts',
+        msg.hasLigatura,
+        msg.fontsConfig,
+      );
     },
     setSvgs: async () => {
       const nodes = figma.currentPage.selection;
-      sendSerializedSelection(nodes, 'setSvgs', msg.hasLigatura, msg.fontsConfig);
+      void sendSerializedSelection(
+        nodes,
+        'setSvgs',
+        msg.hasLigatura,
+        msg.fontsConfig,
+      );
     },
     setFontConfig: () => {
-      figma.root.setSharedPluginData('font_icon_generator', 'form', JSON.stringify(msg.fontsConfig));
+      figma.root.setSharedPluginData(
+        'font_icon_generator',
+        'form',
+        JSON.stringify(msg.fontsConfig),
+      );
     },
     getFontConfig: () => {
       try {
-        const form = figma.root.getSharedPluginData('font_icon_generator', 'form');
+        const form = figma.root.getSharedPluginData(
+          'font_icon_generator',
+          'form',
+        );
         figma.ui.postMessage({
           type: 'setRootFontConfg',
-          files: form ? JSON.parse(form) : {fontName: 'font-generator', fontHeight: '1024', version: '1.0'}
+          files: form
+            ? JSON.parse(form)
+            : {
+                fontName: 'font-generator',
+                fontHeight: '1024',
+                version: '1.0',
+              },
         });
       } catch (e) {
         console.log('Error reading tokens', e);
@@ -37,15 +55,15 @@ figma.ui.onmessage = (msg) => {
     },
     createFigmaVetors: async () => {
       try {
-        await figma.loadFontAsync({family: "Open Sans", style: "Regular"});
-      } catch(e) {
-        figma.notify(e);
+        await figma.loadFontAsync({ family: 'Open Sans', style: 'Regular' });
+      } catch (e) {
+        figma.notify(e as string);
       }
 
-      let frameContainerNodeId;
-      let frameContainerNode ;
+      let frameIconsNodeId;
+      let frameIconsNode;
       let frameSelectorsNodeId;
-      let frameSelectorsNode ;
+      let frameSelectorsNode;
 
       const gap = 10;
       const columns = 10;
@@ -57,16 +75,16 @@ figma.ui.onmessage = (msg) => {
       let y = 0 + margin;
       let completedIcons = 0;
 
-      msg.vectors.forEach((icon: IconInformation) => {
-        if (figma.getNodeById(frameContainerNodeId) == null) {
+      msg.vectors.forEach((icon: IIconInformation) => {
+        if (figma.getNodeById(frameIconsNodeId) == null) {
           const frame: FrameNode = figma.createFrame();
           frame.visible = false;
           figma.currentPage.appendChild(frame);
           frame.x = figma.viewport.center.x - 420;
           frame.y = figma.viewport.center.y;
           const frameSelectors: FrameNode = frame.clone();
-          frameContainerNodeId = frame.id;
-          frameContainerNode = figma.getNodeById(frameContainerNodeId);
+          frameIconsNodeId = frame.id;
+          frameIconsNode = figma.getNodeById(frameIconsNodeId);
           frameSelectorsNodeId = frameSelectors.id;
           frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId);
 
@@ -74,11 +92,11 @@ figma.ui.onmessage = (msg) => {
           fills[0].opacity = 0;
           frameSelectorsNode.fills = fills;
         } else {
-          frameContainerNode = figma.getNodeById(frameContainerNodeId)
+          frameIconsNode = figma.getNodeById(frameIconsNodeId);
           frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId);
         }
 
-        frameContainerNode.visible = true;
+        frameIconsNode.visible = true;
         frameSelectorsNode.visible = true;
 
         const frame: FrameNode = figma.createFrame();
@@ -86,17 +104,17 @@ figma.ui.onmessage = (msg) => {
         const labelName: TextNode = figma.createText();
 
         frame.resize(componentWidth, componentHeight);
-        
+
         glyph.resize(20, 20);
-        glyph.name = icon.figmaName;
+        glyph.name = icon.figmaName ?? '';
         glyph.clipsContent = false;
 
         frame.x = x;
         frame.y = y;
 
-        labelName.name = "name";
-        labelName.fontName = { family: "Open Sans", style: "Regular"};
-        labelName.textAlignHorizontal = "CENTER";
+        labelName.name = 'name';
+        labelName.fontName = { family: 'Open Sans', style: 'Regular' };
+        labelName.textAlignHorizontal = 'CENTER';
         labelName.fontSize = 6;
 
         const labelCode = labelName.clone();
@@ -108,7 +126,7 @@ figma.ui.onmessage = (msg) => {
         labelLiga.name = 'liga';
         labelLiga.characters = `Ligatures: ${icon.liga}`;
 
-        glyph.x = (frame.width / 2) - (glyph.width / 2);
+        glyph.x = frame.width / 2 - glyph.width / 2;
         glyph.y = 10;
 
         frame.appendChild(labelName);
@@ -116,30 +134,33 @@ figma.ui.onmessage = (msg) => {
         frame.appendChild(labelLiga);
         frame.appendChild(glyph);
 
-        labelName.x = (frame.width / 2) - (labelName.width / 2);
+        labelName.x = frame.width / 2 - labelName.width / 2;
         labelName.y = 35;
-        labelCode.x = (frame.width / 2) - (labelCode.width / 2);
+        labelCode.x = frame.width / 2 - labelCode.width / 2;
         labelCode.y = labelName.y + 10;
-        labelLiga.x = (frame.width / 2) - (labelLiga.width / 2);
+        labelLiga.x = frame.width / 2 - labelLiga.width / 2;
         labelLiga.y = labelCode.y + 10;
 
-        const group2 = figma.group([labelName, labelCode, labelLiga], figma.currentPage)
+        const group2 = figma.group(
+          [labelName, labelCode, labelLiga],
+          figma.currentPage,
+        );
         const group = figma.group([glyph], figma.currentPage);
         group.name = 'figma group';
-        group2.name = 'Icons Selectors'
+        group2.name = 'Icons Selectors';
         frame.remove();
-        frameContainerNode.appendChild(glyph);
+        frameIconsNode.appendChild(glyph);
         frameSelectorsNode.appendChild(group2);
 
         x = x + componentWidth + gap;
-        if (x > ((componentWidth + gap) * columns) + margin - gap) {
+        if (x > (componentWidth + gap) * columns + margin - gap) {
           y = y + componentHeight + gap;
           x = 0 + margin;
         }
-        frameContainerNode.resize(840, y + componentHeight + gap + margin);
+        frameIconsNode.resize(840, y + componentHeight + gap + margin);
         frameSelectorsNode.resize(840, y + componentHeight + gap + margin);
         completedIcons = completedIcons + 1;
-      })
+      });
     },
   };
 
@@ -148,30 +169,37 @@ figma.ui.onmessage = (msg) => {
 
 figma.on('selectionchange', () => {
   const nodes = figma.currentPage.selection;
-  sendSerializedSelection(nodes, 'setSvgs', true);
-})
+  void sendSerializedSelection(nodes, 'setSvgs', true);
+});
 
 const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
-  const svg = await node.exportAsync({format: 'SVG'})
-    .then(res => String.fromCharCode.apply(null, res))
-    .catch(err => console.error(err));
+  const svg: any = await node
+    .exportAsync({ format: 'SVG' })
+    .then((res: any) => String.fromCharCode.apply(null, res))
+    .catch((err) => console.error(err));
 
   return {
     name: node.name,
-    svg
-  }
-}
+    svg,
+  };
+};
 
-const getSerializedSelection = (selection: readonly SceneNode[]) =>
-  Promise.all(selection.map(serialize))
+const getSerializedSelection = async (
+  selection: readonly SceneNode[],
+): Promise<ISerializedSVG[]> => await Promise.all(selection.map(serialize));
 
-const sendSerializedSelection = async (selection: readonly SceneNode[], type: string, hasLigatura, fontsConfig?) => {
+const sendSerializedSelection = async (
+  selection: readonly SceneNode[],
+  type: string,
+  hasLigatura,
+  fontsConfig?,
+): Promise<void> => {
   const svgs = await getSerializedSelection(selection);
-      
+
   figma.ui.postMessage({
-    type: type,
+    type,
     files: svgs,
     fontsConfig,
-    hasLigatura
+    hasLigatura,
   });
-}
+};

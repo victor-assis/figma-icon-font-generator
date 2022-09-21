@@ -1,5 +1,5 @@
 # Figma icon font generator plugin
-Icon-font generator, easy to use from figma vectors, with it you will generate.
+Easy to use from figma vectors, with it you will generate:
 
 - SVG
 - EOT
@@ -16,28 +16,19 @@ Plugin link in figma community: [Figma-icon-font-generator](https://www.figma.co
 
 This pluggin detects all vectors selected. It then convert to fonts files, show a preview of result.
 
-
-
 ## Basic Usage
 
 Select a vector.*
 click in "Generate Font" to download of zip with files.
 
-
 > *Note: unpredictable things can happen if you select more complex vectors.
-
-
 
 ## More Configs
 
 ### Font Parameters:
 On the tab "Font Config" you can config some parameters from the font, including "Font Name", "Font Weight", "Font Style" ...*
 
-
-
 > *Note: That informations are save on the file.
-
-
 
 ### Ligatures and Unicode:
 
