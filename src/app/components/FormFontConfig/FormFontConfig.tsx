@@ -1,13 +1,17 @@
 import React, { ReactElement, useState } from 'react';
-import { Checkbox, FormControlLabel, TextField } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { IFormConfig } from '../../shared/typings';
 import './FormFontConfig.scss';
 
 const FormFontConfig = ({
   onChange,
+  onLigatureChange,
   form,
 }: {
   onChange: Function;
+  onLigatureChange: Function;
   form: IFormConfig;
 }): ReactElement => {
   const [fontName, setfontName] = useState(form.fontName);
@@ -18,6 +22,7 @@ const FormFontConfig = ({
   const [centerHorizontally, setCenterHorizontally] = useState(
     form.centerHorizontally ?? false,
   );
+  const [ligature, setLigature] = useState(true);
   const [centerVertically, setCenterVertically] = useState(
     form.centerVertically ?? false,
   );
@@ -47,41 +52,58 @@ const FormFontConfig = ({
 
   return (
     <form className="figma-form-config">
-      <TextField
-        variant="outlined"
-        label="Font Name"
-        onChange={(e) => {
-          setfontName(e.target.value);
-          onChangeEnt({ fontName: e.target.value });
-        }}
-        value={fontName}
-      />
-      <TextField
-        variant="outlined"
-        label="Font Weight"
-        onChange={(e) => {
-          setfontHeight(e.target.value);
-          onChangeEnt({ fontHeight: e.target.value });
-        }}
-        value={fontHeight}
-      />
-      <TextField
-        variant="outlined"
-        label="Font Style"
-        onChange={(e) => {
-          setFontStyle(e.target.value);
-          onChangeEnt({ fontStyle: e.target.value });
-        }}
-        value={fontStyle}
-      />
-      <TextField
-        variant="outlined"
-        label="Font Weight"
-        onChange={(e) => {
-          setFontWeight(e.target.value);
-          onChangeEnt({ fontWeight: e.target.value });
-        }}
-        value={fontWeight}
+      <div className="figma-form-config__columns">
+        <TextField
+          variant="outlined"
+          label="Font Name"
+          onChange={(e) => {
+            setfontName(e.target.value);
+            onChangeEnt({ fontName: e.target.value });
+          }}
+          value={fontName}
+        />
+
+        <TextField
+          variant="outlined"
+          label="Font Weight"
+          onChange={(e) => {
+            setfontHeight(e.target.value);
+            onChangeEnt({ fontHeight: e.target.value });
+          }}
+          value={fontHeight}
+        />
+        <TextField
+          variant="outlined"
+          label="Font Style"
+          onChange={(e) => {
+            setFontStyle(e.target.value);
+            onChangeEnt({ fontStyle: e.target.value });
+          }}
+          value={fontStyle}
+        />
+        <TextField
+          variant="outlined"
+          label="Font Weight"
+          onChange={(e) => {
+            setFontWeight(e.target.value);
+            onChangeEnt({ fontWeight: e.target.value });
+          }}
+          value={fontWeight}
+        />
+      </div>
+
+      <FormControlLabel
+        control={
+          <Checkbox
+            onChange={(e) => {
+              setLigature(e.target.checked);
+              onLigatureChange(e.target.checked);
+            }}
+            checked={ligature}
+          />
+        }
+        label="Ligature"
+        labelPlacement="end"
       />
 
       <FormControlLabel
@@ -96,6 +118,7 @@ const FormFontConfig = ({
         }
         label="fixedWidth"
       />
+
       <FormControlLabel
         control={
           <Checkbox
@@ -108,6 +131,7 @@ const FormFontConfig = ({
         }
         label="centerHorizontally"
       />
+
       <FormControlLabel
         control={
           <Checkbox
@@ -120,6 +144,7 @@ const FormFontConfig = ({
         }
         label="centerVertically"
       />
+
       <FormControlLabel
         control={
           <Checkbox
@@ -132,6 +157,7 @@ const FormFontConfig = ({
         }
         label="normalize"
       />
+
       <FormControlLabel
         control={
           <Checkbox

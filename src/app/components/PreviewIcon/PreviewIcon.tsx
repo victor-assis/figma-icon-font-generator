@@ -1,12 +1,11 @@
 import React, { Fragment, ReactElement } from 'react';
 import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../shared/typings';
+import Card from '@mui/material/Card';
 
 let style: HTMLStyleElement;
 
@@ -35,31 +34,51 @@ const PreviewIcon = ({
              url("${fontsFiles.urls.svg}") format("svg");\n\
         font-weight: normal;\n\
         font-style: normal;\n\
+        -webkit-font-smoothing: antialiased;\n\
       }\n\
     `;
   }
 
   const iconSelect = (file: IJsonType): ReactElement => (
     <>
-      {ligatura && <>Ligatures: {file?.ligature?.toString()}</>}
-      Unicode: {file?.unicode?.toString()}
+      {ligatura && (
+        <>
+          <span>{`Ligatures: ${file?.ligature?.toString()}`}</span>
+          <br />
+        </>
+      )}
+      <span>{`Unicode: ${file?.unicode?.toString()}`}</span>
     </>
   );
 
   return (
     <>
-      <List sx={{ width: '100%' }}>
+      <List
+        sx={{
+          width: '100%',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '1rem',
+        }}
+      >
         {fontsFiles?.json?.map((file: IJsonType, index: number) => (
           <Fragment key={index}>
-            <ListItem alignItems="flex-start">
-              <ListItemAvatar>
+            <Card sx={{ display: 'flex' }}>
+              <ListItem
+                alignItems="center"
+                sx={{ display: 'block', textAlign: 'center' }}
+              >
                 <i className="icon-preview">
                   {file.ligature?.[0] ? file.ligature[0] : file.unicode[0]}
                 </i>
-              </ListItemAvatar>
-              <ListItemText primary={file.name} secondary={iconSelect(file)} />
-            </ListItem>
-            <Divider variant="inset" component="li" />
+                <ListItemText
+                  primary={file.name}
+                  secondary={iconSelect(file)}
+                  sx={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  className="icon-info"
+                />
+              </ListItem>
+            </Card>
           </Fragment>
         ))}
       </List>

@@ -1,5 +1,5 @@
 {
-  "name": "Figma icon font generator",
+  "name": "Icon font generator",
   "id": "1136442533698384554",
   "api": "1.0.0",
   "main": "dist/code.js",
