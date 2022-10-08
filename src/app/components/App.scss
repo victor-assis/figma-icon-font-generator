@@ -5,9 +5,9 @@ html {
 body {
 	font-family: montserrat, arial, verdana;
 	font: 16px sans-serif;
+  color: #444;
 	text-align: center;
 	margin: 0;
-	padding: 1rem;
 }
 
 ::-webkit-scrollbar {
@@ -30,23 +30,18 @@ body {
 	gap: 1.25rem;
 	width: 100%;
 	padding-bottom: 70px;
-
-	&__title {
-		font-size: 1rem;
-	}
-
-	&__tabs {
-		display: flex;
-		justify-content: center;
-		font-size: .8rem;
-	}
-
+	
 	&__button {
 		background-color: #fff;
 		position: fixed;
 		bottom: 0;
 		width: 100%;
 		padding: 1rem;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		z-index: 999;
+		border-top: 1px solid rgba(0, 0, 0, 0.12);
 
 		button {
 			width: auto;

@@ -8,11 +8,12 @@ import React, {
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CheckIcon from '@mui/icons-material/Check';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import Divider from '@mui/material/Divider';
 
 import { generateFonts } from '../shared/fonts';
 import { IFormConfig, IGeneratedFont, ITabPanelProps } from '../shared/typings';
@@ -41,11 +42,16 @@ const TabPanel = (props: ITabPanelProps): ReactElement => {
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
   const [icons, setIcons] = useState([]);
-  const [fontsConfig, setfontConfig] = useState<IFormConfig>();
+  const [fontsConfig, setFontConfig] = useState<IFormConfig>();
   const [fontsFiles, setFontsFiles] = useState<IGeneratedFont>();
   const [hasLigatura, setHasLigatura] = useState(true);
+  const [nodes, setNodes] = useState<SceneNode[]>();
+  const [loadingUpload, setLoadingUpload] = React.useState(false);
+  const [loadingGenerate, setLoadingGenerate] = React.useState(false);
 
   const onSubmit = (): void => {
+    setLoadingGenerate(true);
+
     parent.postMessage(
       { pluginMessage: { type: 'SerializeSvgs', fontsConfig, hasLigatura } },
       '*',
@@ -57,7 +63,7 @@ const App = (): ReactElement => {
   };
 
   const setConfig = (config): void => {
-    setfontConfig(config);
+    setFontConfig(config);
   };
 
   const callback = (config): void => {
@@ -66,12 +72,16 @@ const App = (): ReactElement => {
   };
 
   const inputFileUpload = (files): void => {
-    void generateVetores(files[0], (vectors) =>
+    if (files) {
+      setLoadingUpload(true);
+    }
+
+    void generateVetores(files[0], (vectors) => {
       parent.postMessage(
         { pluginMessage: { type: 'createFigmaVetors', vectors } },
         '*',
-      ),
-    );
+      );
+    });
   };
 
   useEffect(() => {
@@ -90,21 +100,29 @@ const App = (): ReactElement => {
 
       const events = {
         downloadFonts: () => {
-          generateFonts(files, fontsConfig, hasLigatura, true);
-          parent.postMessage(
-            { pluginMessage: { type: 'setFontConfig', fontsConfig } },
-            '*',
-          );
+          generateFonts(files, fontsConfig, hasLigatura, true, () => {
+            parent.postMessage(
+              { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+              '*',
+            );
+            setLoadingGenerate(false);
+          });
         },
         setSvgs: () => {
           if (files.length) {
-            generateFonts(files, fontsConfig, true, false, callback);
+            generateFonts(files, fontsConfig, hasLigatura, false, callback);
             return;
           }
           setIcons(files);
         },
         setRootFontConfg: () => {
-          setfontConfig(files);
+          setFontConfig(files);
+        },
+        notifySelected: () => {
+          setNodes(files);
+        },
+        notifyLoading: () => {
+          setLoadingUpload(false);
         },
       };
 
@@ -122,80 +140,78 @@ const App = (): ReactElement => {
 
   return (
     <div className="figma-font">
-      <h2 className="figma-font__title">Figma Icon Font Generator</h2>
       <Box sx={{ width: '100%' }}>
-        <Box
-          sx={{
-            display: 'inline-block',
-            borderBottom: 1,
-            borderColor: 'divider',
-          }}
-        >
-          <Tabs value={tabValue} onChange={handleChange}>
-            <Tab
-              label="Preview"
-              id="app-tab-0"
-              aria-controls="app-tabpanel-0"
-            />
-            <Tab
-              label="Font Config"
-              id="app-tab-1"
-              aria-controls="app-tabpanel-1"
-            />
-          </Tabs>
-        </Box>
+        <Tabs value={tabValue} onChange={handleChange} variant="fullWidth">
+          <Tab
+            label="Preview"
+            id="app-tab-0"
+            aria-controls="app-tabpanel-0"
+            icon={<AutoAwesomeIcon fontSize="small" />}
+            iconPosition="start"
+            sx={{ minHeight: '45px', border: 'none' }}
+          />
+          <Tab
+            label="Font Config"
+            id="app-tab-1"
+            aria-controls="app-tabpanel-1"
+            icon={<SettingsIcon fontSize="small" />}
+            iconPosition="start"
+            sx={{ minHeight: '45px', border: 'none' }}
+          />
+        </Tabs>
+        <Divider />
         <TabPanel value={tabValue} index={0}>
-          {icons.length === 0 ? (
-            <Alert severity="warning">
-              <AlertTitle>Select an icon</AlertTitle>
-              No selected icon found!
-            </Alert>
+          {!nodes || nodes.length === 0 ? (
+            <Alert severity="warning">No selected icon found!</Alert>
           ) : (
-            memoPreviewIcon
+            <>
+              <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+                {`selected ${nodes.length} vector${
+                  nodes.length > 1 ? 's' : ''
+                }`}
+              </Alert>
+              {memoPreviewIcon}
+            </>
           )}
-
-          <Button
-            variant="outlined"
-            component="label"
-            color="secondary"
-            size="small"
-            sx={{ marginTop: '16px' }}
-          >
-            Upload Font SVG
-            <input
-              type="file"
-              accept=".svg"
-              hidden
-              onChange={(e) => inputFileUpload(e.target.files)}
-            />
-          </Button>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           {fontsConfig && (
-            <FormFontConfig onChange={setConfig} form={fontsConfig} />
+            <FormFontConfig
+              onChange={setConfig}
+              form={fontsConfig}
+              onLigatureChange={setHasLigatura}
+            />
           )}
         </TabPanel>
       </Box>
 
       <div className="figma-font__button">
-        <FormControlLabel
-          control={
-            <Switch
-              checked={hasLigatura}
-              onChange={(e) => setHasLigatura(e.target.checked)}
-            />
-          }
-          label="Ligadura"
-        />
+        <LoadingButton
+          variant="outlined"
+          component="label"
+          color="secondary"
+          size="small"
+          loading={loadingUpload}
+        >
+          Upload Font SVG
+          <input
+            type="file"
+            accept=".svg"
+            hidden
+            onChange={(e) => inputFileUpload(e.target.files)}
+          />
+        </LoadingButton>
 
-        <Button
+        <LoadingButton
           variant="outlined"
           className="figma-font__button"
           onClick={onSubmit}
           disabled={icons.length === 0}
+          size="small"
+          loading={loadingGenerate}
         >
           Generate Font
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );

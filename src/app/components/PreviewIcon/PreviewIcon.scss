@@ -18,5 +18,11 @@
   -moz-osx-font-smoothing: grayscale;
   font-size: 2.3rem;
   direction: ltr;
-  -webkit-font-smoothing: antialiased;
+  color: #444;
+}
+
+.icon-info p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
