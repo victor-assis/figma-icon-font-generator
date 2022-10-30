@@ -12,7 +12,7 @@ figma.ui.onmessage = (msg) => {
         .map((node) => {
           try {
             const vector = (node as any)?.findChildren((child) => {
-              return child.name.includes('ue');
+              return child.name.includes('ue') || child.name.includes('--');
             });
             return vector.length ? vector : node;
           } catch {
@@ -35,6 +35,15 @@ figma.ui.onmessage = (msg) => {
         msg.hasLigatura,
         msg.fontsConfig,
       );
+    },
+    changeIconName: () => {
+      msg.iconsConfig.forEach((el) => {
+        const node = figma.getNodeById(el.id);
+
+        if (node.name !== el.name) {
+          node.name = el.name
+        }
+      });
     },
     setFontConfig: () => {
       figma.root.setSharedPluginData(
@@ -83,7 +92,7 @@ figma.on('selectionchange', () => {
     .map((node) => {
       try {
         const vector = (node as any)?.findChildren((child) => {
-          return child.name.includes('ue');
+          return child.name.includes('ue') || child.name.includes('--');
         });
         return vector.length ? vector : node;
       } catch {
@@ -107,6 +116,7 @@ const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
 
   return {
     name: node.name,
+    id: node.id,
     svg,
   };
 };

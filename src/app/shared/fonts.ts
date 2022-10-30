@@ -25,93 +25,13 @@ export const generateFonts = (
   callback?: Function,
 ): void => {
   try {
-    const _zip = new JSZip();
-    const json: IJsonType[] = [];
     const fontStream = new SVGIcons2SVGFontStream(optons);
     const decoder = new StringDecoder('utf8');
     const parts: string[] = [];
     const urls: IFontFormats = {};
-    let namesControl: string[] = [];
-    let ligasControl: string[] = [];
 
-    const iconStreams = files.map((file: ISerializedSVG, index: number) => {
-      let matches: string[];
-
-      const blob = new Blob([file.svg], { type: 'image/svg+xml' });
-      const svg = new File([blob], `${file.name}.svg`, {
-        type: 'image/svg+xml',
-      });
-      const iconStream: PassThrough & {
-        metadata?: { unicode: string[]; name: string };
-      } = new PassThrough();
-      const reader = new FileReader();
-      const curCodepoint =
-        index <= 999 ? `ue${`000${index}`.substr(-3)}` : `ue${index++}`;
-
-      if (!svg.name.includes('--')) {
-        matches = svg.name.match(
-          /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(.+)\.svg$/i,
-        ) as string[];
-      } else {
-        matches = svg.name.match(
-          /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(?:(.+)--)?(.+)\.svg$/i,
-        ) as string[];
-      }
-
-      const matcheName = verifySingleString(matches[2], namesControl);
-      namesControl = [...namesControl, matcheName];
-
-      const ligature = hasLigatura
-        ? matches?.[3]
-          ? matches[3].split(',')
-          : [matcheName.replace(/ /g, '-')]
-        : [];
-
-      ligature.forEach((liga, index) => {
-        const repeatLiga = verifySingleString(liga, ligasControl);
-
-        if (repeatLiga !== liga) {
-          ligature[index] = repeatLiga;
-        }
-      });
-
-      ligasControl = [...ligasControl, ...ligature];
-
-      const unicode = matches?.[1]
-        ? matches[1].split(',').map((match) => {
-            match = match.substr(1);
-            return match
-              .split('u')
-              .map((code) => String.fromCodePoint(parseInt(code, 16)))
-              .join('');
-          })
-        : [String.fromCharCode(parseInt(curCodepoint, 16))];
-
-      if (download) {
-        const svgs = _zip.folder('svg');
-        svgs?.file(`${matches?.[2] ? matcheName : file.name}.svg`, svg);
-      }
-
-      reader.onload = (e) => {
-        iconStream.write(e.target?.result);
-        iconStream.end();
-      };
-      reader.readAsText(svg);
-
-      iconStream.metadata = {
-        unicode: [...unicode, ...ligature],
-        name: matches?.[2] ? matcheName : file.name,
-      };
-
-      json.push({
-        svg: file.svg,
-        name: matches?.[2] ? matcheName : file.name,
-        ligature,
-        unicode: matches?.[1] ? matches[1].split(',') : curCodepoint,
-      });
-
-      return iconStream;
-    });
+    const json = iconConfigs(files, hasLigatura);
+    const {iconStreams, _zip} = iconsStrems(json, download);
 
     fontStream.on('data', (chunk) => {
       parts.push(decoder.write(chunk));
@@ -170,6 +90,8 @@ export const generateFonts = (
         );
       }
 
+      generatedFont = { urls, optons, json };
+
       if (download) {
         _zip.file(`${optons.fontName}.json`, JSON.stringify(json));
         _zip.file(`${optons.fontName}.svg`, svgFont);
@@ -186,17 +108,148 @@ export const generateFonts = (
       }
 
       if (callback && !download) {
-        generatedFont = { urls, optons, json };
         callback(generatedFont);
       }
     });
 
     iconStreams.forEach(fontStream.write.bind(fontStream));
     fontStream.end();
-  } catch {
-    callback();
+  } catch (e) {
+    callback(e);
   }
 };
+
+export const iconConfigs = (
+  files: ISerializedSVG[],
+  hasLigatura: boolean,
+) => {
+  let json: IJsonType[] = [];
+  let namesControl: string[] = [];
+  let ligasControl: string[] = [];
+  let unicodesExisting: string[] = [];
+
+  files.forEach((file: ISerializedSVG) => {
+    let matches: string[];
+
+    
+    const blob = new Blob([file.svg], { type: 'image/svg+xml' });
+    const svg = new File([blob], `${file.name}.svg`, {
+      type: 'image/svg+xml',
+    });
+
+
+    if (!svg.name.includes('--')) {
+      matches = svg.name.match(
+        /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(.+)\.svg$/i,
+      ) as string[];
+    } else {
+      matches = svg.name.match(
+        /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(?:(.+)--)?(.+)\.svg$/i,
+      ) as string[];
+    }
+
+    const matcheName = verifySingleString(matches[2], namesControl);
+    namesControl = [...namesControl, matcheName];
+
+    const ligature = hasLigatura
+      ? matches?.[3]
+        ? matches[3].split(',')
+        : [matcheName.replace(/ /g, '-')]
+      : [];
+
+    ligature.forEach((liga, index) => {
+      const repeatLiga = verifySingleString(liga, ligasControl);
+
+      if (repeatLiga !== liga) {
+        ligature[index] = repeatLiga;
+      }
+    });
+
+    ligasControl = [...ligasControl, ...ligature];
+
+    if (matches?.[1]) {
+      matches[1].split(',').filter(element => {
+        if (unicodesExisting.includes(element)) {
+          throw new Error(`Duplicate unicode - ${element}`, );
+        }
+      });
+
+      unicodesExisting = [...unicodesExisting, ...matches[1].split(',')];
+    }
+
+    json.push({
+      id: file.id,
+      svg: file.svg,
+      svgFile: svg,
+      name: matches?.[2] ? matcheName : file.name,
+      ligature,
+      unicode: matches?.[1] ? matches[1].split(',') : '',
+    });
+  });
+
+  json = json.map((icon) => {
+    if (!icon.unicode) {
+      for (let i = 0; i < json.length; i++) {
+        const curCodepoint = `u${(parseInt('e900', 16) + i).toString(16)}`;
+        if (!unicodesExisting.includes(curCodepoint)) {
+          unicodesExisting.push(curCodepoint);
+          icon.unicode = [curCodepoint];
+          break;
+        }
+        continue;        
+      }
+
+      return icon;
+    }
+
+    return icon;
+  });
+
+  return json;
+}
+
+export const iconsStrems = (
+  json: IJsonType[],
+  download?: boolean,
+) => {
+  const _zip = new JSZip();
+
+  const iconStreams = json.map((icon: IJsonType) => {
+    const iconStream: PassThrough & {
+      metadata?: { unicode: string[]; name: string };
+    } = new PassThrough();
+
+    const reader = new FileReader();
+
+    if (download) {
+      const svgs = _zip.folder('svg');
+      svgs?.file(`${icon.name}.svg`, icon.svgFile);
+    }
+
+    reader.onload = (e) => {
+      iconStream.write(e.target?.result);
+      iconStream.end();
+    };
+    reader.readAsText(icon.svgFile);
+
+    const unicode = 
+      Array.isArray(icon.unicode) ?
+        icon.unicode.map((curCodepoint) => String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16))) :
+        [String.fromCharCode(parseInt(icon.unicode.replace('u', '0x')))];
+
+    iconStream.metadata = {
+      unicode: [...unicode, ...icon.ligature],
+      name: icon.name,
+    };
+  
+    return iconStream;
+  });
+
+  return {
+    iconStreams,
+    _zip
+  };
+}
 
 const createSvgSymbol = (files: ISerializedSVG[]): string => {
   const $ = cheerio.load(
