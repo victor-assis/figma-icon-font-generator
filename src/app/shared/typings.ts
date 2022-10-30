@@ -2,7 +2,9 @@ import { ReactNode } from 'react';
 import SVGIcons2SVGFontStream from 'svgicons2svgfont';
 
 export interface IJsonType {
+  id: string;
   svg: string;
+  svgFile: File;
   name: string;
   unicode: string[] | string;
   ligature?: string[] | string;
@@ -26,6 +28,7 @@ export interface IIconInformation {
 
 export interface ISerializedSVG {
   name: string;
+  id: string;
   svg: string;
 }
 

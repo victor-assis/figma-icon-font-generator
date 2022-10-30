@@ -14,6 +14,11 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CheckIcon from '@mui/icons-material/Check';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Divider from '@mui/material/Divider';
+import PreviewIcon from './PreviewIcon/PreviewIcon';
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';;
+import CloseIcon from '@mui/icons-material/Close';
 
 import { generateFonts } from '../shared/fonts';
 import { IFormConfig, IGeneratedFont, ITabPanelProps } from '../shared/typings';
@@ -21,7 +26,6 @@ import { generateVetores } from '../shared/vetors';
 
 import './App.scss';
 import FormFontConfig from './FormFontConfig/FormFontConfig';
-import PreviewIcon from './PreviewIcon/PreviewIcon';
 
 const TabPanel = (props: ITabPanelProps): ReactElement => {
   const { children, value, index, ...other } = props;
@@ -48,6 +52,8 @@ const App = (): ReactElement => {
   const [nodes, setNodes] = useState<SceneNode[]>();
   const [loadingUpload, setLoadingUpload] = React.useState(false);
   const [loadingGenerate, setLoadingGenerate] = React.useState(false);
+  const [openSnack, setOpenSnack] = React.useState(false);
+  const [errors, setErrors] = React.useState('');
 
   const onSubmit = (): void => {
     setLoadingGenerate(true);
@@ -67,8 +73,15 @@ const App = (): ReactElement => {
   };
 
   const callback = (config): void => {
-    setFontsFiles(config);
-    setIcons(config.json);
+    if (config.name !== 'Error') {
+      setFontsFiles(config);
+      setIcons(config.json);
+
+      return;
+    }
+
+    setErrors(config.message);
+    setOpenSnack(true);
   };
 
   const inputFileUpload = (files): void => {
@@ -100,9 +113,19 @@ const App = (): ReactElement => {
 
       const events = {
         downloadFonts: () => {
-          generateFonts(files, fontsConfig, hasLigatura, true, () => {
+          generateFonts(files, fontsConfig, hasLigatura, true, (generatedFont) => {
             parent.postMessage(
               { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+              '*',
+            );
+            parent.postMessage(
+              { pluginMessage: { 
+                type: 'changeIconName',
+                iconsConfig: generatedFont.json.map(v => ({ 
+                  id: v.id,
+                  name: (`${v.unicode.join(',')}-${v.name}`) + (v.ligature && v.ligature.join(',') !== v.name ? `--${v.ligature.join(',')}` : '')
+                })) }
+              },
               '*',
             );
             setLoadingGenerate(false);
@@ -213,6 +236,36 @@ const App = (): ReactElement => {
           Generate Font
         </LoadingButton>
       </div>
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnack(false)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+      >
+        <Alert
+          severity="warning"
+          action={
+            <React.Fragment>
+              <Button color="inherit" size="small" onClick={() => setOpenSnack(false)}>
+                ok
+              </Button>
+
+              <IconButton
+                onClick={() => setOpenSnack(false)}
+                aria-label="close"
+                color="inherit"
+                sx={{ p: 0.5 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </React.Fragment>
+          }
+        >{errors}</Alert>
+      </Snackbar>
+
     </div>
   );
 };
