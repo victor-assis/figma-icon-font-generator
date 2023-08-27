@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <font id="font-generator" horiz-adv-x="1226.7722772277227">
+    <font-face font-family="font-generator"
+      units-per-em="1024" ascent="1024"
+      descent="0" />
+    <missing-glyph horiz-adv-x="0" />
+    <glyph glyph-name="Rectangle 2"
+      unicode="&#xE900;"
+      horiz-adv-x="1226.7722772277227" d="M1155.80198019802 70.9702970297029H70.970297029703V953.029702970297H1155.80198019802V70.9702970297029z" />
+    <glyph glyph-name="Rectangle 2-1"
+      unicode="&#x52;&#x65;&#x63;&#x74;&#x61;&#x6E;&#x67;&#x6C;&#x65;&#x2D;&#x32;"
+      horiz-adv-x="1226.7722772277227" d="M1155.80198019802 70.9702970297029H70.970297029703V953.029702970297H1155.80198019802V70.9702970297029z" />
+  </font>
+</defs>
+</svg>
