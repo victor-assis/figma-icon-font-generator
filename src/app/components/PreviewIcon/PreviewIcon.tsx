@@ -2,10 +2,10 @@ import React, { Fragment, ReactElement } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
+import Card from '@mui/material/Card';
 
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../shared/typings';
-import Card from '@mui/material/Card';
 
 let style: HTMLStyleElement;
 

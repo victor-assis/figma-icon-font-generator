@@ -11,7 +11,7 @@ module.exports = (env, argv) => ({
   },
   module: {
     rules: [
-      { test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
+      { test: /\.tsx?$/, use: { loader: 'ts-loader', options: { onlyCompileBundledFiles: true }}, exclude: /node_modules/ },
       {
         test: /\.s[ac]ss$/i,
         use: [

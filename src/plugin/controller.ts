@@ -1,12 +1,17 @@
 import { IIconInformation, ISerializedSVG } from '../app/shared/typings';
 
 figma.showUI(__html__, {
-  width: 400,
+  width: 460,
   height: 550,
 });
 
 figma.ui.onmessage = (msg) => {
   const settings = {
+    OnLoad: () => {
+      if (figma.currentPage.selection.length > 0) {
+        sendSelectedNode();
+      }
+    },
     SerializeSvgs: () => {
       const nodes = figma.currentPage.selection
         .map((node) => {
@@ -27,6 +32,28 @@ figma.ui.onmessage = (msg) => {
         msg.fontsConfig,
       );
     },
+    CommitGithub: () => {
+      const nodes = figma.currentPage.selection
+        .map((node) => {
+          try {
+            const vector = (node as any)?.findChildren((child) => {
+              return child.name.includes('ue') || child.name.includes('--');
+            });
+            return vector.length ? vector : node;
+          } catch {
+            return node;
+          }
+        })
+        .flat();
+
+      void sendSerializedSelection(
+        nodes,
+        'commitGithub',
+        msg.hasLigatura,
+        msg.fontsConfig,
+        msg.githubData,
+      );
+    },
     setSvgs: async () => {
       const nodes = figma.currentPage.selection;
       void sendSerializedSelection(
@@ -41,7 +68,7 @@ figma.ui.onmessage = (msg) => {
         const node = figma.getNodeById(el.id);
 
         if (node.name !== el.name) {
-          node.name = el.name
+          node.name = el.name;
         }
       });
     },
@@ -73,6 +100,26 @@ figma.ui.onmessage = (msg) => {
       }
       return null;
     },
+    setGithubData: async () => {
+      await figma.clientStorage.setAsync(
+        'font_icon_generator',
+        JSON.stringify(msg.githubData),
+      );
+    },
+    getGithubData: async () => {
+      try {
+        const github = await figma.clientStorage.getAsync(
+          'font_icon_generator',
+        );
+        figma.ui.postMessage({
+          type: 'setClientGithubData',
+          files: JSON.parse(github),
+        });
+      } catch (e) {
+        console.log('Error reading tokens', e);
+      }
+      return null;
+    },
     createFigmaVetors: async () => {
       try {
         await figma.loadFontAsync({ family: 'Open Sans', style: 'Regular' });
@@ -87,7 +134,9 @@ figma.ui.onmessage = (msg) => {
   settings[msg.type]();
 };
 
-figma.on('selectionchange', () => {
+figma.on('selectionchange', () => sendSelectedNode());
+
+const sendSelectedNode = () => {
   const nodes = figma.currentPage.selection
     .map((node) => {
       try {
@@ -100,13 +149,14 @@ figma.on('selectionchange', () => {
       }
     })
     .flat();
+
   void sendSerializedSelection(nodes, 'setSvgs', true);
 
   figma.ui.postMessage({
     type: 'notifySelected',
     files: nodes,
   });
-});
+};
 
 const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
   const svg: any = await node
@@ -130,6 +180,7 @@ const sendSerializedSelection = async (
   type: string,
   hasLigatura,
   fontsConfig?,
+  githubData?,
 ): Promise<void> => {
   const svgs = await getSerializedSelection(selection);
 
@@ -138,6 +189,7 @@ const sendSerializedSelection = async (
     files: svgs,
     fontsConfig,
     hasLigatura,
+    githubData,
   });
 };
 

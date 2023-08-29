@@ -17,15 +17,23 @@ import Divider from '@mui/material/Divider';
 import PreviewIcon from './PreviewIcon/PreviewIcon';
 import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';;
+import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 import { generateFonts } from '../shared/fonts';
-import { IFormConfig, IGeneratedFont, ITabPanelProps } from '../shared/typings';
+import {
+  IFormConfig,
+  IFormGithub,
+  IGeneratedFont,
+  ITabPanelProps,
+} from '../shared/typings';
 import { generateVetores } from '../shared/vetors';
+import { isObjectEmpty } from '../shared/utils';
 
 import './App.scss';
 import FormFontConfig from './FormFontConfig/FormFontConfig';
+import GithubIntegration from './githubIntegration/githubIntegration';
 
 const TabPanel = (props: ITabPanelProps): ReactElement => {
   const { children, value, index, ...other } = props;
@@ -47,6 +55,7 @@ const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
   const [icons, setIcons] = useState([]);
   const [fontsConfig, setFontConfig] = useState<IFormConfig>();
+  const [githubData, setGithubData] = useState<IFormGithub>();
   const [fontsFiles, setFontsFiles] = useState<IGeneratedFont>();
   const [hasLigatura, setHasLigatura] = useState(true);
   const [nodes, setNodes] = useState<SceneNode[]>();
@@ -64,12 +73,32 @@ const App = (): ReactElement => {
     );
   };
 
+  const commitFiles = (): void => {
+    setLoadingGenerate(true);
+
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: 'CommitGithub',
+          fontsConfig,
+          hasLigatura,
+          githubData,
+        },
+      },
+      '*',
+    );
+  };
+
   const handleChange = (event: SyntheticEvent, newValue: number): void => {
     event && setTabValue(newValue);
   };
 
   const setConfig = (config): void => {
     setFontConfig(config);
+  };
+
+  const setGithub = (data): void => {
+    setGithubData(data);
   };
 
   const callback = (config): void => {
@@ -98,38 +127,92 @@ const App = (): ReactElement => {
   };
 
   useEffect(() => {
+    parent.postMessage({ pluginMessage: { type: 'OnLoad' } }, '*');
     parent.postMessage(
       { pluginMessage: { type: 'setSvgs', fontsConfig } },
       '*',
     );
     parent.postMessage({ pluginMessage: { type: 'getFontConfig' } }, '*');
+    parent.postMessage({ pluginMessage: { type: 'getGithubData' } }, '*');
     window.onmessage = (event) => {
       if (!event.data.pluginMessage) {
         return;
       }
 
-      const { type, files, fontsConfig, hasLigatura } =
+      const { type, files, fontsConfig, hasLigatura, githubData } =
         event.data?.pluginMessage;
 
       const events = {
         downloadFonts: () => {
-          generateFonts(files, fontsConfig, hasLigatura, true, (generatedFont) => {
-            parent.postMessage(
-              { pluginMessage: { type: 'setFontConfig', fontsConfig } },
-              '*',
-            );
-            parent.postMessage(
-              { pluginMessage: { 
-                type: 'changeIconName',
-                iconsConfig: generatedFont.json.map(v => ({ 
-                  id: v.id,
-                  name: (`${v.unicode.join(',')}-${v.name}`) + (v.ligature && v.ligature.join(',') !== v.name ? `--${v.ligature.join(',')}` : '')
-                })) }
-              },
-              '*',
-            );
-            setLoadingGenerate(false);
-          });
+          generateFonts(
+            files,
+            fontsConfig,
+            hasLigatura,
+            true,
+            (generatedFont) => {
+              parent.postMessage(
+                { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+                '*',
+              );
+              parent.postMessage(
+                { pluginMessage: { type: 'setGithubData', githubData } },
+                '*',
+              );
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: 'changeIconName',
+                    iconsConfig: generatedFont.json.map((v) => ({
+                      id: v.id,
+                      name:
+                        `${v.unicode.join(',')}-${v.name}` +
+                        (v.ligature && v.ligature.join(',') !== v.name
+                          ? `--${v.ligature.join(',')}`
+                          : ''),
+                    })),
+                  },
+                },
+                '*',
+              );
+              setLoadingGenerate(false);
+            },
+          );
+        },
+        commitGithub: () => {
+          generateFonts(
+            files,
+            fontsConfig,
+            hasLigatura,
+            false,
+            (generatedFont) => {
+              parent.postMessage(
+                { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+                '*',
+              );
+              parent.postMessage(
+                { pluginMessage: { type: 'setGithubData', githubData } },
+                '*',
+              );
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: 'changeIconName',
+                    iconsConfig: generatedFont.json.map((v) => ({
+                      id: v.id,
+                      name:
+                        `${v.unicode.join(',')}-${v.name}` +
+                        (v.ligature && v.ligature.join(',') !== v.name
+                          ? `--${v.ligature.join(',')}`
+                          : ''),
+                    })),
+                  },
+                },
+                '*',
+              );
+              setLoadingGenerate(false);
+            },
+            githubData,
+          );
         },
         setSvgs: () => {
           if (files.length) {
@@ -140,6 +223,9 @@ const App = (): ReactElement => {
         },
         setRootFontConfg: () => {
           setFontConfig(files);
+        },
+        setClientGithubData: () => {
+          setGithubData(files);
         },
         notifySelected: () => {
           setNodes(files);
@@ -174,10 +260,18 @@ const App = (): ReactElement => {
             sx={{ minHeight: '45px', border: 'none' }}
           />
           <Tab
-            label="Font Config"
+            label="Config"
             id="app-tab-1"
             aria-controls="app-tabpanel-1"
             icon={<SettingsIcon fontSize="small" />}
+            iconPosition="start"
+            sx={{ minHeight: '45px', border: 'none' }}
+          />
+          <Tab
+            label="GitHub"
+            id="app-tab-2"
+            aria-controls="app-tabpanel-2"
+            icon={<GitHubIcon fontSize="small" />}
             iconPosition="start"
             sx={{ minHeight: '45px', border: 'none' }}
           />
@@ -206,11 +300,15 @@ const App = (): ReactElement => {
             />
           )}
         </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <GithubIntegration onChange={setGithub} form={githubData} />
+        </TabPanel>
       </Box>
 
-      <div className="figma-font__button">
+      <div className="figma-font__buttons">
         <LoadingButton
           variant="outlined"
+          className="figma-font__button"
           component="label"
           color="secondary"
           size="small"
@@ -235,6 +333,18 @@ const App = (): ReactElement => {
         >
           Generate Font
         </LoadingButton>
+
+        <LoadingButton
+          variant="outlined"
+          className="figma-font__button"
+          onClick={commitFiles}
+          disabled={icons.length === 0 || isObjectEmpty(githubData)}
+          color="success"
+          size="small"
+          loading={loadingGenerate}
+        >
+          commit on github
+        </LoadingButton>
       </div>
       <Snackbar
         open={openSnack}
@@ -249,7 +359,11 @@ const App = (): ReactElement => {
           severity="warning"
           action={
             <React.Fragment>
-              <Button color="inherit" size="small" onClick={() => setOpenSnack(false)}>
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => setOpenSnack(false)}
+              >
                 ok
               </Button>
 
@@ -263,9 +377,10 @@ const App = (): ReactElement => {
               </IconButton>
             </React.Fragment>
           }
-        >{errors}</Alert>
+        >
+          {errors}
+        </Alert>
       </Snackbar>
-
     </div>
   );
 };
