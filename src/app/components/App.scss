@@ -31,7 +31,7 @@ body {
 	width: 100%;
 	padding-bottom: 70px;
 	
-	&__button {
+	&__buttons {
 		background-color: #fff;
 		position: fixed;
 		bottom: 0;
@@ -46,5 +46,9 @@ body {
 		button {
 			width: auto;
 		}
+	}
+
+	&__button {
+		font-size: .7rem !important;
 	}
 }

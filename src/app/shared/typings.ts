@@ -45,6 +45,17 @@ export interface IFormConfig {
   version: string;
 }
 
+export interface IFormGithub {
+  githubToken: string;
+  owner: string;
+  repo: string;
+  branch: string;
+  filePath: string;
+  commitMessage: string;
+  pullRequestTitle: string;
+  mainBranch: string;
+}
+
 export interface IGeneratedFont {
   urls: IFontFormats;
   optons: SVGIcons2SVGFontStream.SvgIcons2FontOptions & { version: string };

@@ -11,11 +11,13 @@ import { PassThrough } from 'stream';
 import { saveAs } from 'file-saver';
 import {
   IFontFormats,
+  IFormGithub,
   IGeneratedFont,
   IJsonType,
   ISerializedSVG,
 } from './typings';
 import { verifySingleString } from './utils';
+import { commitFileAndOpenPR } from './github';
 
 export const generateFonts = (
   files: ISerializedSVG[],
@@ -23,6 +25,7 @@ export const generateFonts = (
   hasLigatura: boolean,
   download?: boolean,
   callback?: Function,
+  gitHubData?: IFormGithub,
 ): void => {
   try {
     const fontStream = new SVGIcons2SVGFontStream(optons);
@@ -31,7 +34,7 @@ export const generateFonts = (
     const urls: IFontFormats = {};
 
     const json = iconConfigs(files, hasLigatura);
-    const {iconStreams, _zip} = iconsStrems(json, download);
+    const { iconStreams, _zip } = iconsStrems(json, download);
 
     fontStream.on('data', (chunk) => {
       parts.push(decoder.write(chunk));
@@ -106,6 +109,20 @@ export const generateFonts = (
           callback(generatedFont);
         });
       }
+      if (gitHubData) {
+        commitFileAndOpenPR(
+          [
+            { name: `${optons.fontName}.json`, content: JSON.stringify(json) },
+            { name: `${optons.fontName}.svg`, content: svgFont },
+            { name: `${optons.fontName}.ttf`, content: ttfFont },
+            { name: `${optons.fontName}.eot`, content: eotFont },
+            { name: `${optons.fontName}.woff`, content: woffFont },
+            { name: `${optons.fontName}.woff2`, content: woff2Font },
+            { name: `${optons.fontName}-defs.svg`, content: symbolSvg },
+          ],
+          gitHubData,
+        );
+      }
 
       if (callback && !download) {
         callback(generatedFont);
@@ -119,10 +136,7 @@ export const generateFonts = (
   }
 };
 
-export const iconConfigs = (
-  files: ISerializedSVG[],
-  hasLigatura: boolean,
-) => {
+export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
   let json: IJsonType[] = [];
   let namesControl: string[] = [];
   let ligasControl: string[] = [];
@@ -131,12 +145,10 @@ export const iconConfigs = (
   files.forEach((file: ISerializedSVG) => {
     let matches: string[];
 
-    
     const blob = new Blob([file.svg], { type: 'image/svg+xml' });
     const svg = new File([blob], `${file.name}.svg`, {
       type: 'image/svg+xml',
     });
-
 
     if (!svg.name.includes('--')) {
       matches = svg.name.match(
@@ -168,9 +180,9 @@ export const iconConfigs = (
     ligasControl = [...ligasControl, ...ligature];
 
     if (matches?.[1]) {
-      matches[1].split(',').filter(element => {
+      matches[1].split(',').filter((element) => {
         if (unicodesExisting.includes(element)) {
-          throw new Error(`Duplicate unicode - ${element}`, );
+          throw new Error(`Duplicate unicode - ${element}`);
         }
       });
 
@@ -196,7 +208,7 @@ export const iconConfigs = (
           icon.unicode = [curCodepoint];
           break;
         }
-        continue;        
+        continue;
       }
 
       return icon;
@@ -206,12 +218,9 @@ export const iconConfigs = (
   });
 
   return json;
-}
+};
 
-export const iconsStrems = (
-  json: IJsonType[],
-  download?: boolean,
-) => {
+export const iconsStrems = (json: IJsonType[], download?: boolean) => {
   const _zip = new JSZip();
 
   const iconStreams = json.map((icon: IJsonType) => {
@@ -232,24 +241,25 @@ export const iconsStrems = (
     };
     reader.readAsText(icon.svgFile);
 
-    const unicode = 
-      Array.isArray(icon.unicode) ?
-        icon.unicode.map((curCodepoint) => String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16))) :
-        [String.fromCharCode(parseInt(icon.unicode.replace('u', '0x')))];
+    const unicode = Array.isArray(icon.unicode)
+      ? icon.unicode.map((curCodepoint) =>
+          String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16)),
+        )
+      : [String.fromCharCode(parseInt(icon.unicode.replace('u', '0x')))];
 
     iconStream.metadata = {
       unicode: [...unicode, ...icon.ligature],
       name: icon.name,
     };
-  
+
     return iconStream;
   });
 
   return {
     iconStreams,
-    _zip
+    _zip,
   };
-}
+};
 
 const createSvgSymbol = (files: ISerializedSVG[]): string => {
   const $ = cheerio.load(
