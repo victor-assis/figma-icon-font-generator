@@ -1,0 +1,43 @@
+[class^="icon-"], [class*=" icon-"] {
+  font-family: 'preview' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  letter-spacing: 0;
+  -webkit-font-feature-settings: "liga";
+  -moz-font-feature-settings: "liga=1";
+  -moz-font-feature-settings: "liga";
+  -ms-font-feature-settings: "liga" 1;
+  font-feature-settings: "liga";
+  -webkit-font-variant-ligatures: discretionary-ligatures;
+  font-variant-ligatures: discretionary-ligatures;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 2.3rem;
+  direction: ltr;
+  color: #444;
+}
+
+.icon-preview-img {
+  min-height: 2.32rem;
+}
+
+.icon-info p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.ligature-example {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #555;
+  display: block;
+  margin-top: 4px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
