@@ -2,11 +2,12 @@
   "name": "Icon font generator",
   "id": "1136442533698384554",
   "api": "1.0.0",
-  "main": "dist/code.js",
-  "ui": "dist/ui.html",
+  "main": "dist/plugin/index.js",
+  "ui": "dist/ui/index.html",
   "editorType": [
     "figma"
   ],
+  "documentAccess": "dynamic-page",
   "networkAccess": {
     "allowedDomains": ["https://api.github.com"],
     "reasoning": "",
