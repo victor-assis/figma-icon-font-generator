@@ -1,0 +1,35 @@
+{
+  "html.format.wrapAttributes": "auto",
+  "html.format.wrapLineLength": 0,
+  "html.format.unformatted": "a, abbr, acronym, b, bdo, big, br, ...",
+  "auto-rename-tag.activetionOnLanguage": ["html", "xml"],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.formatOnSave": false
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.trimTrailingWhitespace": true,
+  "scss.scannerExclude": ["**/.git"],
+  "stylelint.validate": ["scss"],
+  "editor.rulers": [
+    {
+      "column": 80,
+      "color": "#023e18"
+    },
+    {
+      "column": 100,
+      "color": "#4b0303a7"
+    }
+  ]
+}

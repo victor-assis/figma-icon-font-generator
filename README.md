@@ -36,6 +36,8 @@ Next to button "Generate Font" you choice if must have ligadures, and unicode is
 
 For ligatures we use the name of files, but you can customizing both ligature and unicode.
 
+You may also assign **tags** to your icons. They will be stored in the generated JSON configuration for later use.
+
 In the vector name, we separede the props as follows:
 
 > {custom unicode}-{name}--{custom ligature}, so you custom parameters of icon.
