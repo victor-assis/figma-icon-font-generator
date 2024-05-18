@@ -2,6 +2,7 @@
 
 const Svg2 = require("oslllo-svg2");
 const Potrace = require("oslllo-potrace");
+// export const Svg = require('oslllo-svg-fixer/src/svg');
 
 export const Svg = function (svg, traceResolution) {
   this.filled = false;

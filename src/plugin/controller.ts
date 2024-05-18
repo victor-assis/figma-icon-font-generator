@@ -1,5 +1,5 @@
 import { IIconInformation, ISerializedSVG } from '../app/shared/typings';
-import { Svg } from '../app/shared/svg';
+// import { Svg } from '../app/shared/svg';
 
 figma.showUI(__html__, {
   width: 460,
@@ -167,7 +167,7 @@ const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
 
     
   
-    console.log(new Svg(svg, 600));
+    // console.log(new Svg(svg, 600));
 
   return {
     name: node.name,
