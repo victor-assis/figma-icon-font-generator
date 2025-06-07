@@ -27,11 +27,15 @@ module.exports = (env, argv) => ({
         ],
       },
       { test: /\.(png|jpg|gif|webp|svg)$/, loader: 'url-loader' },
+      { test: /\.wasm$/, type: 'asset/resource' },
       {
         test: /\.node$/,
         use: 'node-loader'
       }
     ],
+  },
+  experiments: {
+    asyncWebAssembly: true,
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],

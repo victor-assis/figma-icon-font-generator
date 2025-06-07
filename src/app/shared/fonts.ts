@@ -3,6 +3,8 @@ import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
 import ttf2woff2 from 'ttf2woff2';
+import wasmUrl from 'ttf2woff2/jssrc/ttf2woff2.wasm';
+(ttf2woff2 as any).locateFile = () => wasmUrl;
 import cheerio from 'cheerio';
 import JSZip from 'jszip';
 
