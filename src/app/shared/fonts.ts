@@ -2,8 +2,8 @@ import { SVGIcons2SVGFontStream, SVGIcons2SVGFontStreamOptions } from 'svgicons2
 import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
-// import ttf2woff2 from 'ttf2woff2';
-// import cheerio from 'cheerio';
+import ttf2woff2 from 'ttf2woff2';
+import cheerio from 'cheerio';
 import JSZip from 'jszip';
 
 import { StringDecoder } from 'string_decoder';
@@ -43,7 +43,7 @@ export const generateFonts = (
     fontStream.on('finish', () => {
       let generatedFont: IGeneratedFont;
       const svgFont = parts.join('');
-      // const symbolSvg = createSvgSymbol(files);
+      const symbolSvg = createSvgSymbol(files);
 
       if (window?.URL?.createObjectURL) {
         urls.svg = window.URL.createObjectURL(
@@ -75,23 +75,23 @@ export const generateFonts = (
         );
       }
 
-    //   // woff2
-    //   const ttfFontBuffer = new Uint8Array(ttfFont);
-    //   let buf = Buffer.alloc(ttfFontBuffer.length);
-    //   ttfFontBuffer.forEach((val, index) => buf.writeUInt8(val, index));
+      // woff2
+      const ttfFontBuffer = new Uint8Array(ttfFont);
+      let buf = Buffer.alloc(ttfFontBuffer.length);
+      ttfFontBuffer.forEach((val, index) => buf.writeUInt8(val, index));
 
-    //   buf = ttf2woff2(buf);
-    //   const woff2Font = new Uint8Array(buf.length);
+      buf = ttf2woff2(buf);
+      const woff2Font = new Uint8Array(buf.length);
 
-    //   for (let i = 0; i < buf.length; i++) {
-    //     woff2Font[i] = buf.readUInt8(i);
-    //   }
+      for (let i = 0; i < buf.length; i++) {
+        woff2Font[i] = buf.readUInt8(i);
+      }
 
-    //   if (window?.URL?.createObjectURL) {
-    //     urls.woff2 = window.URL.createObjectURL(
-    //       new Blob([woff2Font], { type: 'application/octet-stream' }),
-    //     );
-    //   }
+      if (window?.URL?.createObjectURL) {
+        urls.woff2 = window.URL.createObjectURL(
+          new Blob([woff2Font], { type: 'application/octet-stream' }),
+        );
+      }
 
       generatedFont = { urls, optons, json };
 
@@ -101,8 +101,8 @@ export const generateFonts = (
         _zip.file(`${optons.fontName}.ttf`, ttfFont);
         _zip.file(`${optons.fontName}.eot`, eotFontBuffer);
         _zip.file(`${optons.fontName}.woff`, woffFontBuffer);
-        // _zip.file(`${optons.fontName}.woff2`, woff2Font);
-        // _zip.file(`${optons.fontName}-defs.svg`, symbolSvg);
+        _zip.file(`${optons.fontName}.woff2`, woff2Font);
+        _zip.file(`${optons.fontName}-defs.svg`, symbolSvg);
 
         void _zip.generateAsync({ type: 'blob' }).then((content) => {
           saveAs(content, `${optons.fontName}-${optons.version}.zip`);
@@ -117,8 +117,8 @@ export const generateFonts = (
             { name: `${optons.fontName}.ttf`, content: ttfFont },
             { name: `${optons.fontName}.eot`, content: eotFontBuffer },
             { name: `${optons.fontName}.woff`, content: woffFontBuffer },
-            // { name: `${optons.fontName}.woff2`, content: woff2Font },
-            // { name: `${optons.fontName}-defs.svg`, content: symbolSvg },
+            { name: `${optons.fontName}.woff2`, content: woff2Font },
+            { name: `${optons.fontName}-defs.svg`, content: symbolSvg },
           ],
           gitHubData,
         );
@@ -267,19 +267,19 @@ export const iconsStrems = (json: IJsonType[], download?: boolean) => {
   };
 };
 
-// const createSvgSymbol = (files: ISerializedSVG[]): string => {
-//   const $ = cheerio.load(
-//     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" style="display:none;"></svg>',
-//     { xmlMode: true },
-//   );
-//   files.forEach((file: ISerializedSVG) => {
-//     const svgNode = $(file.svg);
-//     const symbolNode = $('<symbol></symbol>');
-//     symbolNode.attr('viewBox', svgNode.attr('viewBox'));
-//     symbolNode.attr('id', file.name);
-//     symbolNode.append(svgNode.html());
-//     $('svg').append(symbolNode);
-//   });
+const createSvgSymbol = (files: ISerializedSVG[]): string => {
+  const $ = cheerio.load(
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" style="display:none;"></svg>',
+    { xmlMode: true },
+  );
+  files.forEach((file: ISerializedSVG) => {
+    const svgNode = $(file.svg);
+    const symbolNode = $('<symbol></symbol>');
+    symbolNode.attr('viewBox', svgNode.attr('viewBox'));
+    symbolNode.attr('id', file.name);
+    symbolNode.append(svgNode.html());
+    $('svg').append(symbolNode);
+  });
 
-//   return $.html('svg');
-// };
+  return $.html('svg');
+};
