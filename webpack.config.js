@@ -35,11 +35,21 @@ module.exports = (env, argv) => ({
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
+    alias: {
+      'node:path': require.resolve('path-browserify'),
+      'node:stream': require.resolve('stream-browserify'),
+      'node:os': require.resolve('os-browserify/browser'),
+      'node:fs': false,
+    },
     fallback: {
       "fs": false,
       "child_process": false,
       "stream": require.resolve("stream-browserify"),
       "path": require.resolve("path-browserify"),
+      "node:fs": false,
+      "node:path": require.resolve("path-browserify"),
+      "node:stream": require.resolve("stream-browserify"),
+      "node:os": require.resolve("os-browserify/browser"),
       "crypto": require.resolve("crypto-browserify"),
       "vm": require.resolve("vm-browserify"),
       "util": require.resolve("util"),
@@ -50,6 +60,7 @@ module.exports = (env, argv) => ({
       "http": require.resolve("stream-http"),
       "https": require.resolve("https-browserify"),
       "string_decoder": require.resolve("string_decoder"),
+      "os": require.resolve("os-browserify/browser"),
     }
   },
   output: {
@@ -66,6 +77,9 @@ module.exports = (env, argv) => ({
     new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/\.(js|css)$/]),
     new webpack.ProvidePlugin({
       process: 'process/browser',
+    }),
+    new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+      resource.request = resource.request.replace(/^node:/, '');
     }),
   ],
 })

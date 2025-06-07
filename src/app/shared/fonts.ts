@@ -1,4 +1,4 @@
-import SVGIcons2SVGFontStream from 'svgicons2svgfont';
+import { SVGIcons2SVGFontStream, SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
 import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
@@ -21,7 +21,7 @@ import { commitFileAndOpenPR } from './github';
 
 export const generateFonts = (
   files: ISerializedSVG[],
-  optons: SVGIcons2SVGFontStream.SvgIcons2FontOptions & { version: string },
+  optons: SVGIcons2SVGFontStreamOptions & { version: string },
   hasLigatura: boolean,
   download?: boolean,
   callback?: Function,
@@ -60,18 +60,18 @@ export const generateFonts = (
       }
 
       // eot
-      const eotFont = ttf2eot(ttfFont).buffer;
+      const eotFontBuffer = ttf2eot(ttfFont);
       if (window?.URL?.createObjectURL) {
         urls.eot = window.URL.createObjectURL(
-          new Blob([eotFont], { type: 'application/octet-stream' }),
+          new Blob([eotFontBuffer], { type: 'application/octet-stream' }),
         );
       }
 
       // woff
-      const woffFont = ttf2woff(new Uint8Array(ttfFont.buffer)).buffer;
+      const woffFontBuffer = ttf2woff(new Uint8Array(ttfFont.buffer));
       if (window?.URL?.createObjectURL) {
         urls.woff = window.URL.createObjectURL(
-          new Blob([woffFont], { type: 'application/octet-stream' }),
+          new Blob([woffFontBuffer], { type: 'application/octet-stream' }),
         );
       }
 
@@ -99,8 +99,8 @@ export const generateFonts = (
         _zip.file(`${optons.fontName}.json`, JSON.stringify(json));
         _zip.file(`${optons.fontName}.svg`, svgFont);
         _zip.file(`${optons.fontName}.ttf`, ttfFont);
-        _zip.file(`${optons.fontName}.eot`, eotFont);
-        _zip.file(`${optons.fontName}.woff`, woffFont);
+        _zip.file(`${optons.fontName}.eot`, eotFontBuffer);
+        _zip.file(`${optons.fontName}.woff`, woffFontBuffer);
         // _zip.file(`${optons.fontName}.woff2`, woff2Font);
         // _zip.file(`${optons.fontName}-defs.svg`, symbolSvg);
 
@@ -115,8 +115,8 @@ export const generateFonts = (
             { name: `${optons.fontName}.json`, content: JSON.stringify(json) },
             { name: `${optons.fontName}.svg`, content: svgFont },
             { name: `${optons.fontName}.ttf`, content: ttfFont },
-            { name: `${optons.fontName}.eot`, content: eotFont },
-            { name: `${optons.fontName}.woff`, content: woffFont },
+            { name: `${optons.fontName}.eot`, content: eotFontBuffer },
+            { name: `${optons.fontName}.woff`, content: woffFontBuffer },
             // { name: `${optons.fontName}.woff2`, content: woff2Font },
             // { name: `${optons.fontName}-defs.svg`, content: symbolSvg },
           ],
