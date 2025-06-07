@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import SVGIcons2SVGFontStream from 'svgicons2svgfont';
+import type { SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
 
 export interface IJsonType {
   id: string;
@@ -58,7 +58,7 @@ export interface IFormGithub {
 
 export interface IGeneratedFont {
   urls: IFontFormats;
-  optons: SVGIcons2SVGFontStream.SvgIcons2FontOptions & { version: string };
+  optons: SVGIcons2SVGFontStreamOptions & { version: string };
   json: IJsonType[];
 }
 
