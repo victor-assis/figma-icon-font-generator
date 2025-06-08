@@ -3,8 +3,21 @@ import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
 import ttf2woff2 from 'ttf2woff2';
-import wasmUrl from 'ttf2woff2/jssrc/ttf2woff2.wasm';
-(ttf2woff2 as any).locateFile = () => wasmUrl;
+// import wasmUrl from 'ttf2woff2/jssrc/ttf2woff2.wasm';
+// (ttf2woff2 as any).locateFile = () => wasmUrl;
+
+// // Figma's plugin environment may block synchronous fetching of the WebAssembly
+// // binary. When the loader inlines the `.wasm` file as a data URL we decode it
+// // and provide the binary directly to the module to avoid a fetch attempt.
+// if (wasmUrl.startsWith('data:')) {
+//   const base64 = wasmUrl.split(',')[1];
+//   const binaryString = atob(base64);
+//   const binary = new Uint8Array(binaryString.length);
+//   for (let i = 0; i < binaryString.length; i++) {
+//     binary[i] = binaryString.charCodeAt(i);
+//   }
+//   (ttf2woff2 as any).wasmBinary = binary;
+// }
 import cheerio from 'cheerio';
 import JSZip from 'jszip';
 
@@ -79,14 +92,13 @@ export const generateFonts = (
 
       // woff2
       const ttfFontBuffer = new Uint8Array(ttfFont);
-      let buf = Buffer.alloc(ttfFontBuffer.length);
-      ttfFontBuffer.forEach((val, index) => buf.writeUInt8(val, index));
+      // Convert Uint8Array to Node.js Buffer
+      let nodeBuffer = Buffer.from(ttfFontBuffer.buffer);
+      const woff2Buffer = ttf2woff2(nodeBuffer);
+      const woff2Font = new Uint8Array(woff2Buffer.length);
 
-      buf = ttf2woff2(buf);
-      const woff2Font = new Uint8Array(buf.length);
-
-      for (let i = 0; i < buf.length; i++) {
-        woff2Font[i] = buf.readUInt8(i);
+      for (let i = 0; i < woff2Buffer.length; i++) {
+        woff2Font[i] = woff2Buffer[i];
       }
 
       if (window?.URL?.createObjectURL) {

@@ -46,7 +46,7 @@
 		"svgicons2svgfont": "^15.0.1",
 		"ttf2eot": "^3.1.0",
 		"ttf2woff": "^3.0.0",
-		"ttf2woff2": "^8.0.0",
+		"ttf2woff2": "^3.0.0",
 		"webfonts-generator": "^0.4.0",
 		"xmldom": "^0.6.0"
 	},
@@ -59,6 +59,7 @@
 		"@types/svg2ttf": "^5.0.3",
 		"@types/ttf2eot": "^2.0.2",
 		"@types/ttf2woff": "^2.0.4",
+		"@types/ttf2woff2": "^2.0.0",
 		"@typescript-eslint/eslint-plugin": "^8.33.1",
 		"assert": "^2.1.0",
 		"browserify-zlib": "^0.2.0",

@@ -27,7 +27,7 @@ module.exports = (env, argv) => ({
         ],
       },
       { test: /\.(png|jpg|gif|webp|svg)$/, loader: 'url-loader' },
-      { test: /\.wasm$/, type: 'asset/resource' },
+      { test: /\.wasm$/, type: 'asset/inline' },
       {
         test: /\.node$/,
         use: 'node-loader'
@@ -70,6 +70,7 @@ module.exports = (env, argv) => ({
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: './',
   },
   plugins: [
     new HtmlWebpackPlugin({
