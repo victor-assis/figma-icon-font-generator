@@ -26,8 +26,7 @@
 		"build": "webpack --mode=production",
 		"eslint": "eslint src/**/*.{js,ts,tsx}",
 		"eslint:fix": "eslint src/**/*.{js,ts,tsx} --fix",
-		"prettier:format": "prettier --write src/**/*.{js,jsx,ts,tsx,css,json}",
-		"fix": "oslllo-svg-fixer -s ./svgs -d ./fixed"
+		"prettier:format": "prettier --write src/**/*.{js,jsx,ts,tsx,css,json}"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
@@ -38,7 +37,6 @@
 		"cheerio": "1.0.0",
 		"file-saver": "^2.0.5",
 		"jszip": "^3.10.1",
-		"oslllo-svg-fixer": "^5.0.0",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"styled-components": "^6.1.18",

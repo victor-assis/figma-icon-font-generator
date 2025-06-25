@@ -1,23 +1,12 @@
-import { SVGIcons2SVGFontStream, SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
+import {
+  SVGIcons2SVGFontStream,
+  SVGIcons2SVGFontStreamOptions,
+} from 'svgicons2svgfont';
 import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
 import ttf2woff2 from 'ttf2woff2';
-// import wasmUrl from 'ttf2woff2/jssrc/ttf2woff2.wasm';
-// (ttf2woff2 as any).locateFile = () => wasmUrl;
 
-// // Figma's plugin environment may block synchronous fetching of the WebAssembly
-// // binary. When the loader inlines the `.wasm` file as a data URL we decode it
-// // and provide the binary directly to the module to avoid a fetch attempt.
-// if (wasmUrl.startsWith('data:')) {
-//   const base64 = wasmUrl.split(',')[1];
-//   const binaryString = atob(base64);
-//   const binary = new Uint8Array(binaryString.length);
-//   for (let i = 0; i < binaryString.length; i++) {
-//     binary[i] = binaryString.charCodeAt(i);
-//   }
-//   (ttf2woff2 as any).wasmBinary = binary;
-// }
 import cheerio from 'cheerio';
 import JSZip from 'jszip';
 
@@ -43,11 +32,15 @@ export const generateFonts = (
   gitHubData?: IFormGithub,
 ): void => {
   try {
+    if (!Array.isArray(files) || files.length === 0) {
+      callback?.(new Error('No SVG files provided'));
+      return;
+    }
     const fontStream = new SVGIcons2SVGFontStream(optons);
     const decoder = new StringDecoder('utf8');
     const parts: string[] = [];
     const urls: IFontFormats = {};
-    
+
     const json = iconConfigs(files, hasLigatura);
     const { iconStreams, _zip } = iconsStrems(json, download);
 
