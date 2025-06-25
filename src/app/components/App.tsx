@@ -114,16 +114,19 @@ const App = (): ReactElement => {
   };
 
   const inputFileUpload = (files): void => {
-    if (files) {
+    if (files && files.length > 0) {
       setLoadingUpload(true);
-    }
 
-    void generateVetores(files[0], (vectors) => {
-      parent.postMessage(
-        { pluginMessage: { type: 'createFigmaVetors', vectors } },
-        '*',
-      );
-    });
+      void generateVetores(files[0], (vectors) => {
+        parent.postMessage(
+          { pluginMessage: { type: 'createFigmaVetors', vectors } },
+          '*',
+        );
+      });
+    } else {
+      setErrors('No SVG file selected');
+      setOpenSnack(true);
+    }
   };
 
   useEffect(() => {
@@ -144,6 +147,13 @@ const App = (): ReactElement => {
 
       const events = {
         downloadFonts: () => {
+          if (!files || files.length === 0) {
+            setErrors('No icons selected');
+            setOpenSnack(true);
+            setLoadingGenerate(false);
+            return;
+          }
+
           generateFonts(
             files,
             fontsConfig,
@@ -179,6 +189,13 @@ const App = (): ReactElement => {
           );
         },
         commitGithub: () => {
+          if (!files || files.length === 0) {
+            setErrors('No icons selected');
+            setOpenSnack(true);
+            setLoadingGenerate(false);
+            return;
+          }
+
           generateFonts(
             files,
             fontsConfig,
@@ -215,11 +232,11 @@ const App = (): ReactElement => {
           );
         },
         setSvgs: () => {
-          if (files.length) {
+          if (files && files.length > 0) {
             generateFonts(files, fontsConfig, hasLigatura, false, callback);
             return;
           }
-          setIcons(files);
+          setIcons(files || []);
         },
         setRootFontConfg: () => {
           setFontConfig(files);

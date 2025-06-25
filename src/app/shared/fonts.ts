@@ -1,4 +1,7 @@
-import { SVGIcons2SVGFontStream, SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
+import {
+  SVGIcons2SVGFontStream,
+  SVGIcons2SVGFontStreamOptions,
+} from 'svgicons2svgfont';
 import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
 import ttf2woff from 'ttf2woff';
@@ -43,11 +46,15 @@ export const generateFonts = (
   gitHubData?: IFormGithub,
 ): void => {
   try {
+    if (!Array.isArray(files) || files.length === 0) {
+      callback?.(new Error('No SVG files provided'));
+      return;
+    }
     const fontStream = new SVGIcons2SVGFontStream(optons);
     const decoder = new StringDecoder('utf8');
     const parts: string[] = [];
     const urls: IFontFormats = {};
-    
+
     const json = iconConfigs(files, hasLigatura);
     const { iconStreams, _zip } = iconsStrems(json, download);
 
