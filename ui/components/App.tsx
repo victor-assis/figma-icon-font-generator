@@ -52,7 +52,11 @@ const TabPanel = (props: ITabPanelProps): ReactElement => {
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
   const [icons, setIcons] = useState([]);
-  const [fontsConfig, setFontConfig] = useState<IFormConfig>();
+  const [fontsConfig, setFontConfig] = useState<IFormConfig>({
+    fontName: 'font-generator',
+    fontHeight: '1024',
+    version: '1.0',
+  });
   const [githubData, setGithubData] = useState<IFormGithub>();
   const [fontsFiles, setFontsFiles] = useState<IGeneratedFont>();
   const [hasLigatura, setHasLigatura] = useState(true);
@@ -346,7 +350,7 @@ const App = (): ReactElement => {
           variant="outlined"
           className="figma-font__button"
           onClick={onSubmit}
-          disabled={icons.length === 0}
+          disabled={icons?.length === 0}
           size="small"
           loading={loadingGenerate}
         >
@@ -357,7 +361,10 @@ const App = (): ReactElement => {
           variant="outlined"
           className="figma-font__button"
           onClick={commitFiles}
-          disabled={icons.length === 0 || isObjectEmpty(githubData)}
+          disabled={
+            icons?.length === 0 ||
+            isObjectEmpty((githubData ?? {}) as Record<string, unknown>)
+          }
           color="success"
           size="small"
           loading={loadingGenerate}

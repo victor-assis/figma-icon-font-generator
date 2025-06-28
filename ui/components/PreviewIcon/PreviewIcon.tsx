@@ -21,6 +21,8 @@ const PreviewIcon = ({
     head.appendChild(style);
   }
 
+  console.log(fontsFiles);
+
   if (fontsFiles?.urls) {
     style.innerHTML = `\n\
       @font-face {\n\
