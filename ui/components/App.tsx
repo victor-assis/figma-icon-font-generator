@@ -27,7 +27,12 @@ import { generateVetores } from '../../shared/vetors';
 import './App.scss';
 import FormFontConfig from './FormFontConfig/FormFontConfig';
 import GithubIntegration from './githubIntegration/githubIntegration';
-import { IFormConfig, IFormGithub, IGeneratedFont } from '../../shared/typings';
+import {
+  IFormConfig,
+  IFormGithub,
+  IGeneratedFont,
+  IJsonType,
+} from '../../shared/typings';
 
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
@@ -45,6 +50,48 @@ const App = (): ReactElement => {
   const [loadingGenerate, setLoadingGenerate] = React.useState(false);
   const [openSnack, setOpenSnack] = React.useState(false);
   const [errors, setErrors] = React.useState('');
+
+  const updateIconData = (
+    id: string,
+    data: Partial<IJsonType>,
+  ): void => {
+    setFontsFiles((prev) => {
+      if (!prev) return prev;
+      const updated = prev.json.map((icon) =>
+        icon.id === id ? { ...icon, ...data } : icon,
+      );
+      const changed = updated.find((i) => i.id === id);
+      if (changed) {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: 'changeIconName',
+              iconsConfig: [
+                {
+                  id: changed.id,
+                  name:
+                    `${Array.isArray(changed.unicode)
+                      ? changed.unicode.join(',')
+                      : changed.unicode}-${changed.name}` +
+                    (changed.ligature &&
+                    changed.ligature.toString() !== changed.name
+                      ? `--${Array.isArray(changed.ligature)
+                          ? changed.ligature.join(',')
+                          : changed.ligature}`
+                      : ''),
+                  unicode: changed.unicode,
+                  ligature: changed.ligature,
+                  tags: changed.tags,
+                },
+              ],
+            },
+          },
+          '*',
+        );
+      }
+      return { ...prev, json: updated };
+    });
+  };
 
   const onSubmit = (): void => {
     setLoadingGenerate(true);
@@ -269,7 +316,11 @@ const App = (): ReactElement => {
   const memoPreviewIcon = useMemo(
     () =>
       fontsFiles && (
-        <PreviewIcon fontsFiles={fontsFiles} ligatura={hasLigatura} />
+        <PreviewIcon
+          fontsFiles={fontsFiles}
+          ligatura={hasLigatura}
+          onChange={updateIconData}
+        />
       ),
     [fontsFiles, hasLigatura],
   );

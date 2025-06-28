@@ -36,6 +36,23 @@ export const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
     name: node.name,
     id: node.id,
     svg,
+    unicode: (() => {
+      try {
+        const data = node.getPluginData('unicode');
+        return data ? JSON.parse(data) : undefined;
+      } catch {
+        return undefined;
+      }
+    })(),
+    ligature: (() => {
+      try {
+        const data = node.getPluginData('ligature');
+        return data ? JSON.parse(data) : undefined;
+      } catch {
+        return undefined;
+      }
+    })(),
+    tags: node.getPluginData('tags') || undefined,
   };
 };
 

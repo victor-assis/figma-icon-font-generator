@@ -53,8 +53,19 @@ figma.ui.onmessage = (msg: PluginMessage) => {
             el.id,
           )) as SceneNode | null;
 
-          if (node && node.name !== el.name) {
-            node.name = el.name;
+          if (node) {
+            if (el.name && node.name !== el.name) {
+              node.name = el.name;
+            }
+            if (el.unicode !== undefined) {
+              node.setPluginData('unicode', JSON.stringify(el.unicode));
+            }
+            if (el.ligature !== undefined) {
+              node.setPluginData('ligature', JSON.stringify(el.ligature));
+            }
+            if (el.tags !== undefined) {
+              node.setPluginData('tags', el.tags ?? '');
+            }
           }
         }
       }

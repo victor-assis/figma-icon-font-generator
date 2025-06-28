@@ -64,6 +64,7 @@ export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
       name: matches?.[2] ? matcheName : file.name,
       ligature,
       unicode: matches?.[1] ? matches[1].split(',') : '',
+      tags: file.tags,
     });
   });
 

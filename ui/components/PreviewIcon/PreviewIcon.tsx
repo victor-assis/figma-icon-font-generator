@@ -2,6 +2,7 @@ import List from '@mui/material/List';
 import Card from '@mui/material/Card';
 import ListItem from '@mui/material/ListItem';
 import { Fragment, ReactElement } from 'react';
+import TextField from '@mui/material/TextField';
 import ListItemText from '@mui/material/ListItemText';
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../../shared/typings';
@@ -11,9 +12,11 @@ let style: HTMLStyleElement;
 const PreviewIcon = ({
   fontsFiles,
   ligatura,
+  onChange,
 }: {
   fontsFiles: IGeneratedFont;
   ligatura: boolean;
+  onChange: (id: string, data: Partial<IJsonType>) => void;
 }): ReactElement => {
   if (!style) {
     const head = document.head || document.getElementsByTagName('head')[0];
@@ -41,12 +44,32 @@ const PreviewIcon = ({
   const iconSelect = (file: IJsonType): ReactElement => (
     <>
       {ligatura && (
-        <>
-          <span>{`Ligatures: ${file?.ligature?.toString()}`}</span>
-          <br />
-        </>
+        <TextField
+          label="Ligature"
+          variant="outlined"
+          size="small"
+          value={Array.isArray(file.ligature) ? file.ligature.join(',') : file.ligature ?? ''}
+          onChange={(e) =>
+            onChange(file.id, { ligature: e.target.value.split(',') })
+          }
+        />
       )}
-      <span>{`Unicode: ${file?.unicode?.toString()}`}</span>
+      <TextField
+        label="Unicode"
+        variant="outlined"
+        size="small"
+        value={Array.isArray(file.unicode) ? file.unicode.join(',') : file.unicode ?? ''}
+        onChange={(e) =>
+          onChange(file.id, { unicode: e.target.value.split(',') })
+        }
+      />
+      <TextField
+        label="Tags"
+        variant="outlined"
+        size="small"
+        value={file.tags ?? ''}
+        onChange={(e) => onChange(file.id, { tags: e.target.value })}
+      />
     </>
   );
 
