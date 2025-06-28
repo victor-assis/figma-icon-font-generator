@@ -146,8 +146,13 @@ const App = (): ReactElement => {
         return;
       }
 
-      const { type, files, fontsConfig, hasLigatura, githubData } =
-        event.data.pluginMessage;
+      const {
+        type,
+        files,
+        fontsConfig: msgFontsConfig,
+        hasLigatura: msgHasLigatura,
+        githubData,
+      } = event.data.pluginMessage;
 
       const events = {
         downloadFonts: () => {
@@ -160,12 +165,12 @@ const App = (): ReactElement => {
 
           generateFonts(
             files,
-            fontsConfig,
-            hasLigatura,
+            msgFontsConfig ?? fontsConfig,
+            msgHasLigatura ?? hasLigatura,
             true,
             (generatedFont) => {
               parent.postMessage(
-                { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+                { pluginMessage: { type: 'setFontConfig', fontsConfig: msgFontsConfig ?? fontsConfig } },
                 '*',
               );
               parent.postMessage(
@@ -202,12 +207,12 @@ const App = (): ReactElement => {
 
           generateFonts(
             files,
-            fontsConfig,
-            hasLigatura,
+            msgFontsConfig ?? fontsConfig,
+            msgHasLigatura ?? hasLigatura,
             false,
             (generatedFont) => {
               parent.postMessage(
-                { pluginMessage: { type: 'setFontConfig', fontsConfig } },
+                { pluginMessage: { type: 'setFontConfig', fontsConfig: msgFontsConfig ?? fontsConfig } },
                 '*',
               );
               parent.postMessage(
@@ -237,7 +242,13 @@ const App = (): ReactElement => {
         },
         setSvgs: () => {
           if (files && files.length > 0) {
-            generateFonts(files, fontsConfig, hasLigatura, false, callback);
+            generateFonts(
+              files,
+              msgFontsConfig ?? fontsConfig,
+              msgHasLigatura ?? hasLigatura,
+              false,
+              callback,
+            );
             return;
           }
           setIcons(files || []);
