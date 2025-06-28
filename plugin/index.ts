@@ -90,14 +90,16 @@ figma.ui.onmessage = (msg: PluginMessage) => {
         msg.fontsConfig,
       );
     },
-    changeIconName: () => {
-      msg.iconsConfig?.forEach((el: IIconConfig) => {
-        const node = figma.getNodeById(el.id) as SceneNode | null;
+    changeIconName: async () => {
+      if (msg.iconsConfig) {
+        for (const el of msg.iconsConfig) {
+          const node = (await figma.getNodeByIdAsync(el.id)) as SceneNode | null;
 
-        if (node && node.name !== el.name) {
-          node.name = el.name;
+          if (node && node.name !== el.name) {
+            node.name = el.name;
+          }
         }
-      });
+      }
     },
     setFontConfig: () => {
       figma.root.setSharedPluginData(
@@ -153,7 +155,7 @@ figma.ui.onmessage = (msg: PluginMessage) => {
       }
 
       if (msg.vectors) {
-        createIconNode(msg.vectors);
+        await createIconNode(msg.vectors);
       }
     },
   };
@@ -229,7 +231,7 @@ const sendSerializedSelection = async (
   });
 };
 
-const createIconNode = (vectors: IIconInformation[]): void => {
+const createIconNode = async (vectors: IIconInformation[]): Promise<void> => {
   let frameIconsNodeId: string | undefined;
   let frameIconsNode: FrameNode | null = null;
   let frameSelectorsNodeId: string | undefined;
@@ -245,8 +247,8 @@ const createIconNode = (vectors: IIconInformation[]): void => {
   let y = 0 + margin;
   let completedIcons = 0;
 
-  vectors.forEach((icon: IIconInformation, index: number) => {
-    if (!frameIconsNodeId || figma.getNodeById(frameIconsNodeId) == null) {
+  for (const [index, icon] of vectors.entries()) {
+    if (!frameIconsNodeId || (await figma.getNodeByIdAsync(frameIconsNodeId)) == null) {
       const frame: FrameNode = figma.createFrame();
       frame.visible = false;
       figma.currentPage.appendChild(frame);
@@ -254,9 +256,9 @@ const createIconNode = (vectors: IIconInformation[]): void => {
       frame.y = figma.viewport.center.y;
       const frameSelectors: FrameNode = frame.clone();
       frameIconsNodeId = frame.id;
-      frameIconsNode = figma.getNodeById(frameIconsNodeId) as FrameNode;
+      frameIconsNode = (await figma.getNodeByIdAsync(frameIconsNodeId)) as FrameNode;
       frameSelectorsNodeId = frameSelectors.id;
-      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId) as FrameNode;
+      frameSelectorsNode = (await figma.getNodeByIdAsync(frameSelectorsNodeId)) as FrameNode;
 
       const fills = JSON.parse(
         JSON.stringify(frameSelectorsNode!.fills),
@@ -266,8 +268,8 @@ const createIconNode = (vectors: IIconInformation[]): void => {
       }
       frameSelectorsNode!.fills = fills;
     } else {
-      frameIconsNode = figma.getNodeById(frameIconsNodeId) as FrameNode;
-      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId!) as FrameNode;
+      frameIconsNode = (await figma.getNodeByIdAsync(frameIconsNodeId)) as FrameNode;
+      frameSelectorsNode = (await figma.getNodeByIdAsync(frameSelectorsNodeId!)) as FrameNode;
     }
 
     frameIconsNode!.visible = true;
@@ -342,5 +344,5 @@ const createIconNode = (vectors: IIconInformation[]): void => {
     if (index === vectors.length - 1) {
       figma.ui.postMessage({ type: 'notifyLoading' });
     }
-  });
+  }
 };
