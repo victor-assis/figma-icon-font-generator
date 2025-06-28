@@ -68,8 +68,15 @@ const PreviewIcon = ({
         label="Tags"
         variant="outlined"
         size="small"
-        value={file.tags ?? ''}
-        onChange={(e) => onChange(file.id, { tags: e.target.value })}
+        value={file.tags?.join(',') ?? ''}
+        onChange={(e) =>
+          onChange(file.id, {
+            tags: e.target.value
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean),
+          })
+        }
       />
     </Stack>
   );

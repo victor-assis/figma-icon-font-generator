@@ -64,7 +64,7 @@ figma.ui.onmessage = (msg: PluginMessage) => {
               node.setPluginData('ligature', JSON.stringify(el.ligature));
             }
             if (el.tags !== undefined) {
-              node.setPluginData('tags', el.tags ?? '');
+              node.setPluginData('tags', JSON.stringify(el.tags ?? []));
             }
           }
         }
