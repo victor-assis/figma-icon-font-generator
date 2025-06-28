@@ -30,24 +30,9 @@ import {
   IFormConfig,
   IFormGithub,
   IGeneratedFont,
-  ITabPanelProps,
 } from '../../shared/typings';
 
-const TabPanel = (props: ITabPanelProps): ReactElement => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`app-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
-    </div>
-  );
-};
+import TabPanel from './TabPanel/TabPanel';
 
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
