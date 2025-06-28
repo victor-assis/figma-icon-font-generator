@@ -88,3 +88,8 @@ export interface IGitFile {
   name: string;
   content: string | Uint8Array | ArrayBuffer;
 }
+
+export interface ExampleFile {
+  name: string;
+  content: string;
+}
