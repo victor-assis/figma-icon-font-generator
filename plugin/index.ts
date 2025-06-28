@@ -1,12 +1,31 @@
-import { IIconInformation, ISerializedSVG } from '../shared/typings';
+import {
+  IIconInformation,
+  ISerializedSVG,
+  IFormConfig,
+  IFormGithub,
+} from '../shared/typings';
+
+interface IIconConfig {
+  id: string;
+  name: string;
+}
+
+interface PluginMessage {
+  type: string;
+  hasLigatura?: boolean;
+  fontsConfig?: IFormConfig;
+  githubData?: IFormGithub;
+  iconsConfig?: IIconConfig[];
+  vectors?: IIconInformation[];
+}
 
 figma.showUI(__html__, {
   width: 460,
   height: 550,
 });
 
-figma.ui.onmessage = (msg) => {
-  const settings = {
+figma.ui.onmessage = (msg: PluginMessage) => {
+  const settings: Record<string, () => void | Promise<void>> = {
     OnLoad: () => {
       if (figma.currentPage.selection.length > 0) {
         sendSelectedNode();
@@ -72,10 +91,10 @@ figma.ui.onmessage = (msg) => {
       );
     },
     changeIconName: () => {
-      msg.iconsConfig.forEach((el) => {
-        const node = figma.getNodeById(el.id);
+      msg.iconsConfig?.forEach((el: IIconConfig) => {
+        const node = figma.getNodeById(el.id) as SceneNode | null;
 
-        if (node.name !== el.name) {
+        if (node && node.name !== el.name) {
           node.name = el.name;
         }
       });
@@ -106,7 +125,6 @@ figma.ui.onmessage = (msg) => {
       } catch (e) {
         console.log('Error reading tokens', e);
       }
-      return null;
     },
     setGithubData: async () => {
       await figma.clientStorage.setAsync(
@@ -126,7 +144,6 @@ figma.ui.onmessage = (msg) => {
       } catch (e) {
         console.log('Error reading tokens', e);
       }
-      return null;
     },
     createFigmaVetors: async () => {
       try {
@@ -135,11 +152,16 @@ figma.ui.onmessage = (msg) => {
         figma.notify(e as string);
       }
 
-      createIconNode(msg.vectors);
+      if (msg.vectors) {
+        createIconNode(msg.vectors);
+      }
     },
   };
 
-  settings[msg.type]();
+  const action = settings[msg.type as keyof typeof settings];
+  if (action) {
+    action();
+  }
 };
 
 figma.on('selectionchange', () => sendSelectedNode());
@@ -170,10 +192,13 @@ const sendSelectedNode = () => {
 };
 
 const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
-  const svg: string = await node
-    .exportAsync({ format: 'SVG' })
-    .then((res: Uint8Array) => String.fromCharCode.apply(null, res))
-    .catch((err) => console.error(err));
+  let svg = '';
+  try {
+    const res = await node.exportAsync({ format: 'SVG' });
+    svg = String.fromCharCode.apply(null, Array.from(res));
+  } catch (err) {
+    console.error(err);
+  }
 
   return {
     name: node.name,
@@ -189,9 +214,9 @@ const getSerializedSelection = async (
 const sendSerializedSelection = async (
   selection: readonly SceneNode[],
   type: string,
-  hasLigatura,
-  fontsConfig?,
-  githubData?,
+  hasLigatura: boolean | undefined,
+  fontsConfig?: IFormConfig,
+  githubData?: IFormGithub,
 ): Promise<void> => {
   const svgs = await getSerializedSelection(selection);
 
@@ -205,10 +230,10 @@ const sendSerializedSelection = async (
 };
 
 const createIconNode = (vectors: IIconInformation[]): void => {
-  let frameIconsNodeId;
-  let frameIconsNode;
-  let frameSelectorsNodeId;
-  let frameSelectorsNode;
+  let frameIconsNodeId: string | undefined;
+  let frameIconsNode: FrameNode | null = null;
+  let frameSelectorsNodeId: string | undefined;
+  let frameSelectorsNode: FrameNode | null = null;
 
   const gap = 10;
   const columns = 10;
@@ -221,7 +246,7 @@ const createIconNode = (vectors: IIconInformation[]): void => {
   let completedIcons = 0;
 
   vectors.forEach((icon: IIconInformation, index: number) => {
-    if (figma.getNodeById(frameIconsNodeId) == null) {
+    if (!frameIconsNodeId || figma.getNodeById(frameIconsNodeId) == null) {
       const frame: FrameNode = figma.createFrame();
       frame.visible = false;
       figma.currentPage.appendChild(frame);
@@ -229,20 +254,24 @@ const createIconNode = (vectors: IIconInformation[]): void => {
       frame.y = figma.viewport.center.y;
       const frameSelectors: FrameNode = frame.clone();
       frameIconsNodeId = frame.id;
-      frameIconsNode = figma.getNodeById(frameIconsNodeId);
+      frameIconsNode = figma.getNodeById(frameIconsNodeId) as FrameNode;
       frameSelectorsNodeId = frameSelectors.id;
-      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId);
+      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId) as FrameNode;
 
-      const fills = JSON.parse(JSON.stringify(frameSelectorsNode.fills));
-      fills[0].opacity = 0;
-      frameSelectorsNode.fills = fills;
+      const fills = JSON.parse(
+        JSON.stringify(frameSelectorsNode!.fills),
+      ) as Paint[];
+      if (fills[0]) {
+        fills[0] = { ...fills[0], opacity: 0 } as Paint;
+      }
+      frameSelectorsNode!.fills = fills;
     } else {
-      frameIconsNode = figma.getNodeById(frameIconsNodeId);
-      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId);
+      frameIconsNode = figma.getNodeById(frameIconsNodeId) as FrameNode;
+      frameSelectorsNode = figma.getNodeById(frameSelectorsNodeId!) as FrameNode;
     }
 
-    frameIconsNode.visible = true;
-    frameSelectorsNode.visible = true;
+    frameIconsNode!.visible = true;
+    frameSelectorsNode!.visible = true;
 
     const frame: FrameNode = figma.createFrame();
     const glyph = figma.createNodeFromSvg(icon.svg);
@@ -252,8 +281,10 @@ const createIconNode = (vectors: IIconInformation[]): void => {
 
     glyph.resize(20, 20);
     glyph.name = icon.name ?? 'icon';
-    glyph.findChild((node: SceneNode) => Boolean(node)).name =
-      icon.figmaName ?? 'vector';
+    const vectorNode = glyph.findChild((node: SceneNode) => Boolean(node));
+    if (vectorNode) {
+      vectorNode.name = icon.figmaName ?? 'vector';
+    }
     glyph.clipsContent = false;
 
     frame.x = x;
@@ -296,16 +327,16 @@ const createIconNode = (vectors: IIconInformation[]): void => {
     group.name = 'figma group';
     group2.name = 'Icons Selectors';
     frame.remove();
-    frameIconsNode.appendChild(glyph);
-    frameSelectorsNode.appendChild(group2);
+    frameIconsNode!.appendChild(glyph);
+    frameSelectorsNode!.appendChild(group2);
 
     x = x + componentWidth + gap;
     if (x > (componentWidth + gap) * columns + margin - gap) {
       y = y + componentHeight + gap;
       x = 0 + margin;
     }
-    frameIconsNode.resize(840, y + componentHeight + gap + margin);
-    frameSelectorsNode.resize(840, y + componentHeight + gap + margin);
+    frameIconsNode!.resize(840, y + componentHeight + gap + margin);
+    frameSelectorsNode!.resize(840, y + componentHeight + gap + margin);
     completedIcons = completedIcons + 1;
 
     if (index === vectors.length - 1) {
