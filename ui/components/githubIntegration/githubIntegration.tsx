@@ -1,21 +1,21 @@
-import React, { ReactElement, useState } from 'react';
+import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
-import { IFormGithub } from '../../shared/typings';
-import './githubIntegration.scss';
 import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
+import './githubIntegration.scss';
 import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
+import React, { ReactElement, useState } from 'react';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
 import FormHelperText from '@mui/material/FormHelperText';
-import Link from '@mui/material/Link';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { IFormGithub } from '../../../shared/typings';
 
 const GithubIntegration = ({
   onChange,
   form,
 }: {
-  onChange: Function;
+  onChange: (form: IFormGithub) => void;
   form: IFormGithub;
 }): ReactElement => {
   const [githubToken, setGithubToken] = useState(form?.githubToken ?? '');
@@ -80,7 +80,15 @@ const GithubIntegration = ({
             </InputAdornment>
           }
         />
-        <FormHelperText id="outlined-adornment-password">For more information access: <Link href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank">Github token</Link></FormHelperText>
+        <FormHelperText id="outlined-adornment-password">
+          For more information access:{' '}
+          <Link
+            href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
+            target="_blank"
+          >
+            Github token
+          </Link>
+        </FormHelperText>
       </FormControl>
 
       <TextField

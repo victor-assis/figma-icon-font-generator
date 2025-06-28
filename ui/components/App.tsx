@@ -1,3 +1,17 @@
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
+import CheckIcon from '@mui/icons-material/Check';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import LoadingButton from '@mui/lab/LoadingButton';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import React, {
   useState,
   useEffect,
@@ -5,35 +19,19 @@ import React, {
   useMemo,
   ReactElement,
 } from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Alert from '@mui/material/Alert';
-import SettingsIcon from '@mui/icons-material/Settings';
-import CheckIcon from '@mui/icons-material/Check';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import Divider from '@mui/material/Divider';
+import { isObjectEmpty } from '../../shared/utils';
+import { generateFonts } from '../../shared/fonts';
 import PreviewIcon from './PreviewIcon/PreviewIcon';
-import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
-import CloseIcon from '@mui/icons-material/Close';
-import GitHubIcon from '@mui/icons-material/GitHub';
-
-import { generateFonts } from '../shared/fonts';
+import { generateVetores } from '../../shared/vetors';
+import FormFontConfig from './FormFontConfig/FormFontConfig';
+import './App.scss';
+import GithubIntegration from './githubIntegration/githubIntegration';
 import {
   IFormConfig,
   IFormGithub,
   IGeneratedFont,
   ITabPanelProps,
-} from '../shared/typings';
-import { generateVetores } from '../shared/vetors';
-import { isObjectEmpty } from '../shared/utils';
-
-import './App.scss';
-import FormFontConfig from './FormFontConfig/FormFontConfig';
-import GithubIntegration from './githubIntegration/githubIntegration';
+} from '../../shared/typings';
 
 const TabPanel = (props: ITabPanelProps): ReactElement => {
   const { children, value, index, ...other } = props;

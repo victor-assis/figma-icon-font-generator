@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noEmit": true,
+        "target": "es6",
+        "moduleResolution": "node",
+        
+        "typeRoots": [
+            "../node_modules/@types",
+            "../node_modules/@figma"
+        ],
+
+        // Skip checking type libraries because of this issue: https://github.com/figma/plugin-typings/issues/90
+        "skipLibCheck": true,
+    }
+}

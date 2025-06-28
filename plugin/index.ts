@@ -1,4 +1,4 @@
-import { IIconInformation, ISerializedSVG } from '../app/shared/typings';
+import { IIconInformation, ISerializedSVG } from '../shared/typings';
 
 figma.showUI(__html__, {
   width: 460,

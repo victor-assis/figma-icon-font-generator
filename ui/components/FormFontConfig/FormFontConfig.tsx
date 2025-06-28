@@ -1,8 +1,8 @@
-import React, { ReactElement, useState } from 'react';
 import Checkbox from '@mui/material/Checkbox';
+import { ReactElement, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { IFormConfig } from '../../shared/typings';
+import { IFormConfig } from '../../../shared/typings';
 import './FormFontConfig.scss';
 
 const FormFontConfig = ({
@@ -10,8 +10,8 @@ const FormFontConfig = ({
   onLigatureChange,
   form,
 }: {
-  onChange: Function;
-  onLigatureChange: Function;
+  onChange: (config: Partial<IFormConfig>) => void;
+  onLigatureChange: (checked: boolean) => void;
   form: IFormConfig;
 }): ReactElement => {
   const [fontName, setfontName] = useState(form.fontName);

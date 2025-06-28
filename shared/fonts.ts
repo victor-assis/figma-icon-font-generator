@@ -1,18 +1,18 @@
+import JSZip from 'jszip';
+import svg2ttf from 'svg2ttf';
+import ttf2eot from 'ttf2eot';
+import cheerio from 'cheerio';
+import ttf2woff from 'ttf2woff';
+import ttf2woff2 from 'ttf2woff2';
+import { saveAs } from 'file-saver';
+import { PassThrough } from 'stream';
+import { StringDecoder } from 'string_decoder';
 import {
   SVGIcons2SVGFontStream,
   SVGIcons2SVGFontStreamOptions,
 } from 'svgicons2svgfont';
-import svg2ttf from 'svg2ttf';
-import ttf2eot from 'ttf2eot';
-import ttf2woff from 'ttf2woff';
-import ttf2woff2 from 'ttf2woff2';
-
-import cheerio from 'cheerio';
-import JSZip from 'jszip';
-
-import { StringDecoder } from 'string_decoder';
-import { PassThrough } from 'stream';
-import { saveAs } from 'file-saver';
+import { verifySingleString } from './utils';
+import { commitFileAndOpenPR } from './github';
 import {
   IFontFormats,
   IFormGithub,
@@ -20,8 +20,6 @@ import {
   IJsonType,
   ISerializedSVG,
 } from './typings';
-import { verifySingleString } from './utils';
-import { commitFileAndOpenPR } from './github';
 
 export const generateFonts = (
   files: ISerializedSVG[],
@@ -86,7 +84,7 @@ export const generateFonts = (
       // woff2
       const ttfFontBuffer = new Uint8Array(ttfFont);
       // Convert Uint8Array to Node.js Buffer
-      let nodeBuffer = Buffer.from(ttfFontBuffer.buffer);
+      const nodeBuffer = Buffer.from(ttfFontBuffer.buffer);
       const woff2Buffer = ttf2woff2(nodeBuffer);
       const woff2Font = new Uint8Array(woff2Buffer.length);
 
