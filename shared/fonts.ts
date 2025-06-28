@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import svg2ttf from 'svg2ttf';
 import ttf2eot from 'ttf2eot';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import ttf2woff from 'ttf2woff';
 import ttf2woff2 from 'ttf2woff2';
 import { saveAs } from 'file-saver';
@@ -272,7 +272,7 @@ export const iconsStrems = (json: IJsonType[], download?: boolean) => {
 };
 
 const createSvgSymbol = (files: ISerializedSVG[]): string => {
-  const $ = cheerio.load(
+  const $ = load(
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" style="display:none;"></svg>',
     { xmlMode: true },
   );
