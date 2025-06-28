@@ -16,9 +16,12 @@ figma.ui.onmessage = (msg) => {
       const nodes = figma.currentPage.selection
         .map((node) => {
           try {
-            const vector = (node as any)?.findChildren((child) => {
+            const vector =
+          'findChildren' in node
+            ? (node as unknown as ChildrenMixin).findChildren((child) => {
               return child.name.includes('ue') || child.name.includes('--');
-            });
+            })
+            : [];
             return vector.length ? vector : node;
           } catch {
             return node;
@@ -36,9 +39,14 @@ figma.ui.onmessage = (msg) => {
       const nodes = figma.currentPage.selection
         .map((node) => {
           try {
-            const vector = (node as any)?.findChildren((child) => {
-              return child.name.includes('ue') || child.name.includes('--');
-            });
+            const vector =
+              'findChildren' in node
+                ? (node as unknown as ChildrenMixin).findChildren((child) => {
+                  return (
+                    child.name.includes('ue') || child.name.includes('--')
+                  );
+                })
+                : [];
             return vector.length ? vector : node;
           } catch {
             return node;
@@ -90,10 +98,10 @@ figma.ui.onmessage = (msg) => {
           files: form
             ? JSON.parse(form)
             : {
-                fontName: 'font-generator',
-                fontHeight: '1024',
-                version: '1.0',
-              },
+              fontName: 'font-generator',
+              fontHeight: '1024',
+              version: '1.0',
+            },
         });
       } catch (e) {
         console.log('Error reading tokens', e);
@@ -140,9 +148,12 @@ const sendSelectedNode = () => {
   const nodes = figma.currentPage.selection
     .map((node) => {
       try {
-        const vector = (node as any)?.findChildren((child) => {
-          return child.name.includes('ue') || child.name.includes('--');
-        });
+        const vector =
+          'findChildren' in node
+            ? (node as unknown as ChildrenMixin).findChildren((child) => {
+              return child.name.includes('ue') || child.name.includes('--');
+            })
+            : [];
         return vector.length ? vector : node;
       } catch {
         return node;
@@ -159,9 +170,9 @@ const sendSelectedNode = () => {
 };
 
 const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
-  const svg: any = await node
+  const svg: string = await node
     .exportAsync({ format: 'SVG' })
-    .then((res: any) => String.fromCharCode.apply(null, res))
+    .then((res: Uint8Array) => String.fromCharCode.apply(null, res))
     .catch((err) => console.error(err));
 
   return {

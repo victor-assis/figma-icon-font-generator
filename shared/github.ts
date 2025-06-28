@@ -1,6 +1,6 @@
 import { IFormGithub } from './typings';
 
-export const fileToBase64 = (file: any) => {
+export const fileToBase64 = (file: Uint8Array | string | ArrayBuffer) => {
   if (file instanceof Uint8Array) {
     return Buffer.from(file).toString('base64');
   }
@@ -8,8 +8,13 @@ export const fileToBase64 = (file: any) => {
   return file;
 };
 
+export interface IGitFile {
+  name: string;
+  content: string | Uint8Array | ArrayBuffer;
+}
+
 export const commitFileAndOpenPR = async (
-  files: any[],
+  files: IGitFile[],
   githubData: IFormGithub,
 ) => {
   const {

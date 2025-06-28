@@ -88,7 +88,9 @@ const App = (): ReactElement => {
   };
 
   const handleChange = (event: SyntheticEvent, newValue: number): void => {
-    event && setTabValue(newValue);
+    if (event) {
+      setTabValue(newValue);
+    }
   };
 
   const setConfig = (config): void => {
@@ -141,7 +143,7 @@ const App = (): ReactElement => {
       }
 
       const { type, files, fontsConfig, hasLigatura, githubData } =
-        event.data?.pluginMessage;
+        event.data.pluginMessage;
 
       const events = {
         downloadFonts: () => {
@@ -250,7 +252,9 @@ const App = (): ReactElement => {
         },
       };
 
-      type && events[type]();
+      if (type) {
+        events[type]();
+      }
     };
   }, []);
 
