@@ -3,7 +3,7 @@ import { IIconInformation } from './typings';
 
 export const generateVetores = async (
   fontSvgText: File,
-  callback: Function,
+  callback: (icons: IIconInformation[]) => void,
 ): Promise<void> => {
   const doc = new DOMParser().parseFromString(
     await fontSvgText.text(),

@@ -26,7 +26,7 @@ export const generateFonts = (
   optons: SVGIcons2SVGFontStreamOptions & { version: string },
   hasLigatura: boolean,
   download?: boolean,
-  callback?: Function,
+  callback?: (result: IGeneratedFont | Error) => void,
   gitHubData?: IFormGithub,
 ): void => {
   try {
@@ -47,7 +47,6 @@ export const generateFonts = (
     });
 
     fontStream.on('finish', () => {
-      let generatedFont: IGeneratedFont;
       const svgFont = parts.join('');
       const symbolSvg = createSvgSymbol(files);
 
@@ -98,7 +97,7 @@ export const generateFonts = (
         );
       }
 
-      generatedFont = { urls, optons, json };
+      const generatedFont: IGeneratedFont = { urls, optons, json };
 
       if (download) {
         _zip.file(`${optons.fontName}.json`, JSON.stringify(json));
@@ -254,8 +253,8 @@ export const iconsStrems = (json: IJsonType[], download?: boolean) => {
 
     const unicode = Array.isArray(icon.unicode)
       ? icon.unicode.map((curCodepoint) =>
-          String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16)),
-        )
+        String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16)),
+      )
       : [String.fromCharCode(parseInt(icon.unicode.replace('u', '0x')))];
 
     iconStream.metadata = {

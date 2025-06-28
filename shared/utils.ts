@@ -8,10 +8,10 @@ export const verifySingleString = (
     : `${array1}${count > 0 ? count + 1 : ''}`;
 };
 
-export const isObjectEmpty = (obj) => {
+export const isObjectEmpty = (obj: Record<string, unknown>): boolean => {
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] !== 'function' && isEmpty(obj[key])) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (typeof (obj as Record<string, unknown>)[key] !== 'function' && isEmpty((obj as Record<string, unknown>)[key])) {
         return true;
       }
     }

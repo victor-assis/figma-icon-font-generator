@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import type { SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
+import { ReactNode } from 'react';
 
 export interface IJsonType {
   id: string;
