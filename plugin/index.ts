@@ -1,27 +1,10 @@
-import {
-  IIconInformation,
-  IFormConfig,
-  IFormGithub,
-} from '../shared/typings';
+/* eslint-disable indent */
+import { PluginMessage } from '../shared/typings';
 import {
   createIconNode,
   getSelectedNodes,
   sendSerializedSelection,
 } from './utils';
-
-interface IIconConfig {
-  id: string;
-  name: string;
-}
-
-interface PluginMessage {
-  type: string;
-  hasLigatura?: boolean;
-  fontsConfig?: IFormConfig;
-  githubData?: IFormGithub;
-  iconsConfig?: IIconConfig[];
-  vectors?: IIconInformation[];
-}
 
 figma.showUI(__html__, {
   width: 460,
@@ -66,7 +49,9 @@ figma.ui.onmessage = (msg: PluginMessage) => {
     changeIconName: async () => {
       if (msg.iconsConfig) {
         for (const el of msg.iconsConfig) {
-          const node = (await figma.getNodeByIdAsync(el.id)) as SceneNode | null;
+          const node = (await figma.getNodeByIdAsync(
+            el.id,
+          )) as SceneNode | null;
 
           if (node && node.name !== el.name) {
             node.name = el.name;
@@ -92,10 +77,10 @@ figma.ui.onmessage = (msg: PluginMessage) => {
           files: form
             ? JSON.parse(form)
             : {
-              fontName: 'font-generator',
-              fontHeight: '1024',
-              version: '1.0',
-            },
+                fontName: 'font-generator',
+                fontHeight: '1024',
+                version: '1.0',
+              },
         });
       } catch (e) {
         console.log('Error reading tokens', e);
@@ -151,4 +136,3 @@ const sendSelectedNode = () => {
     files: nodes,
   });
 };
-

@@ -16,7 +16,7 @@ const GithubIntegration = ({
   form,
 }: {
   onChange: (form: IFormGithub) => void;
-  form: IFormGithub;
+  form?: IFormGithub;
 }): ReactElement => {
   const [githubToken, setGithubToken] = useState(form?.githubToken ?? '');
   const [owner, setOwner] = useState(form?.owner ?? '');

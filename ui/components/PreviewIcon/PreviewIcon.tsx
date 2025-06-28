@@ -1,7 +1,7 @@
 import List from '@mui/material/List';
 import Card from '@mui/material/Card';
 import ListItem from '@mui/material/ListItem';
-import React, { Fragment, ReactElement } from 'react';
+import { Fragment, ReactElement } from 'react';
 import ListItemText from '@mui/material/ListItemText';
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../../shared/typings';

@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "strict": true,
         "noEmit": true,
         "target": "es6",
         "moduleResolution": "node",

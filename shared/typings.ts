@@ -1,5 +1,4 @@
 import type { SVGIcons2SVGFontStreamOptions } from 'svgicons2svgfont';
-import { ReactNode } from 'react';
 
 export interface IJsonType {
   id: string;
@@ -8,12 +7,6 @@ export interface IJsonType {
   name: string;
   unicode: string[] | string;
   ligature?: string[] | string;
-}
-
-export interface ITabPanelProps {
-  children?: ReactNode;
-  index: number;
-  value: number;
 }
 
 export interface IIconInformation {
@@ -68,4 +61,23 @@ export interface IFontFormats {
   eot?: string;
   woff?: string;
   woff2?: string;
+}
+
+export interface IIconConfig {
+  id: string;
+  name: string;
+}
+
+export interface PluginMessage {
+  type: string;
+  hasLigatura?: boolean;
+  fontsConfig?: IFormConfig;
+  githubData?: IFormGithub;
+  iconsConfig?: IIconConfig[];
+  vectors?: IIconInformation[];
+}
+
+export interface IGitFile {
+  name: string;
+  content: string | Uint8Array | ArrayBuffer;
 }

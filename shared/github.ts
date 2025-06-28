@@ -1,4 +1,4 @@
-import { IFormGithub } from './typings';
+import { IFormGithub, IGitFile } from './typings';
 
 export const fileToBase64 = (file: Uint8Array | string | ArrayBuffer) => {
   if (file instanceof Uint8Array) {
@@ -7,11 +7,6 @@ export const fileToBase64 = (file: Uint8Array | string | ArrayBuffer) => {
 
   return file;
 };
-
-export interface IGitFile {
-  name: string;
-  content: string | Uint8Array | ArrayBuffer;
-}
 
 export const commitFileAndOpenPR = async (
   files: IGitFile[],

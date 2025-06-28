@@ -19,35 +19,15 @@ import React, {
   useMemo,
   ReactElement,
 } from 'react';
+import TabPanel from './TabPanel/TabPanel';
 import { isObjectEmpty } from '../../shared/utils';
 import { generateFonts } from '../../shared/fonts';
 import PreviewIcon from './PreviewIcon/PreviewIcon';
 import { generateVetores } from '../../shared/vetors';
-import FormFontConfig from './FormFontConfig/FormFontConfig';
 import './App.scss';
+import FormFontConfig from './FormFontConfig/FormFontConfig';
 import GithubIntegration from './githubIntegration/githubIntegration';
-import {
-  IFormConfig,
-  IFormGithub,
-  IGeneratedFont,
-  ITabPanelProps,
-} from '../../shared/typings';
-
-const TabPanel = (props: ITabPanelProps): ReactElement => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`app-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
-    </div>
-  );
-};
+import { IFormConfig, IFormGithub, IGeneratedFont } from '../../shared/typings';
 
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
@@ -97,15 +77,18 @@ const App = (): ReactElement => {
     }
   };
 
-  const setConfig = (config): void => {
-    setFontConfig(config);
+  const setConfig = (config: Partial<IFormConfig>): void => {
+    setFontConfig((prev) => ({
+      ...prev,
+      ...config,
+    }));
   };
 
-  const setGithub = (data): void => {
+  const setGithub = (data: IFormGithub): void => {
     setGithubData(data);
   };
 
-  const callback = (config): void => {
+  const callback = (config: any): void => {
     if (config.name !== 'Error') {
       setFontsFiles(config);
       setIcons(config.json);
@@ -117,7 +100,7 @@ const App = (): ReactElement => {
     setOpenSnack(true);
   };
 
-  const inputFileUpload = (files): void => {
+  const inputFileUpload = (files: FileList): void => {
     if (files && files.length > 0) {
       setLoadingUpload(true);
 
@@ -170,7 +153,12 @@ const App = (): ReactElement => {
             true,
             (generatedFont) => {
               parent.postMessage(
-                { pluginMessage: { type: 'setFontConfig', fontsConfig: msgFontsConfig ?? fontsConfig } },
+                {
+                  pluginMessage: {
+                    type: 'setFontConfig',
+                    fontsConfig: msgFontsConfig ?? fontsConfig,
+                  },
+                },
                 '*',
               );
               parent.postMessage(
@@ -212,7 +200,12 @@ const App = (): ReactElement => {
             false,
             (generatedFont) => {
               parent.postMessage(
-                { pluginMessage: { type: 'setFontConfig', fontsConfig: msgFontsConfig ?? fontsConfig } },
+                {
+                  pluginMessage: {
+                    type: 'setFontConfig',
+                    fontsConfig: msgFontsConfig ?? fontsConfig,
+                  },
+                },
                 '*',
               );
               parent.postMessage(
@@ -267,8 +260,8 @@ const App = (): ReactElement => {
         },
       };
 
-      if (type) {
-        events[type]();
+      if (type && type in events) {
+        (events as Record<string, () => void>)[type]();
       }
     };
   }, []);
@@ -353,7 +346,11 @@ const App = (): ReactElement => {
             type="file"
             accept=".svg"
             hidden
-            onChange={(e) => inputFileUpload(e.target.files)}
+            onChange={(e) => {
+              if (e.target.files) {
+                inputFileUpload(e.target.files);
+              }
+            }}
           />
         </LoadingButton>
 
