@@ -32,26 +32,41 @@ export const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
     console.error(err);
   }
 
+  const regexWithoutExt = node.name.includes('--')
+    ? /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(?:(.+)--)?(.+)$/i
+    : /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(.+)$/i;
+  const matches = node.name.match(regexWithoutExt);
+
+  const unicodeFromName = matches && matches[1] ? matches[1].split(',') : undefined;
+  const ligatureFromName =
+    node.name.includes('--') && matches && matches[3]
+      ? matches[3].split(',')
+      : undefined;
+
+  const storedUnicode = (() => {
+    try {
+      const data = node.getPluginData('unicode');
+      return data ? JSON.parse(data) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
+  const storedLigature = (() => {
+    try {
+      const data = node.getPluginData('ligature');
+      return data ? JSON.parse(data) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
   return {
-    name: node.name,
+    name: matches && matches[2] ? matches[2] : node.name,
     id: node.id,
     svg,
-    unicode: (() => {
-      try {
-        const data = node.getPluginData('unicode');
-        return data ? JSON.parse(data) : undefined;
-      } catch {
-        return undefined;
-      }
-    })(),
-    ligature: (() => {
-      try {
-        const data = node.getPluginData('ligature');
-        return data ? JSON.parse(data) : undefined;
-      } catch {
-        return undefined;
-      }
-    })(),
+    unicode: unicodeFromName ?? storedUnicode,
+    ligature: ligatureFromName ?? storedLigature,
     tags: node.getPluginData('tags') || undefined,
   };
 };

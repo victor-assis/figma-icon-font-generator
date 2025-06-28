@@ -11,7 +11,7 @@ export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
   let unicodesExisting: string[] = [];
 
   files.forEach((file: ISerializedSVG) => {
-    let matches: string[];
+    let matches: string[] | null;
 
     const blob = new Blob([file.svg], { type: 'image/svg+xml' });
     const svg = new File([blob], `${file.name}.svg`, {
@@ -21,20 +21,27 @@ export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
     if (!svg.name.includes('--')) {
       matches = svg.name.match(
         /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(.+)\.svg$/i,
-      ) as string[];
+      );
     } else {
       matches = svg.name.match(
         /^(?:((?:u[0-9a-f]{4,6},?)+)-)?(?:(.+)--)?(.+)\.svg$/i,
-      ) as string[];
+      );
     }
 
-    const matcheName = verifySingleString(matches[2], namesControl);
+    const matcheName = verifySingleString(
+      (matches && matches[2]) || file.name,
+      namesControl,
+    );
     namesControl = [...namesControl, matcheName];
 
+    const ligatureFromName = matches && matches[3] ? matches[3].split(',') : undefined;
+    const storedLigature = file.ligature
+      ? Array.isArray(file.ligature)
+        ? file.ligature
+        : [file.ligature]
+      : undefined;
     const ligature = hasLigatura
-      ? matches?.[3]
-        ? matches[3].split(',')
-        : [matcheName.replace(/ /g, '-')]
+      ? ligatureFromName ?? storedLigature ?? [matcheName.replace(/ /g, '-')]
       : [];
 
     ligature.forEach((liga, index) => {
@@ -47,23 +54,31 @@ export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
 
     ligasControl = [...ligasControl, ...ligature];
 
-    if (matches?.[1]) {
-      matches[1].split(',').filter((element) => {
+    const unicodeFromName = matches && matches[1] ? matches[1].split(',') : undefined;
+    const storedUnicode = file.unicode
+      ? Array.isArray(file.unicode)
+        ? file.unicode
+        : [file.unicode]
+      : undefined;
+    const unicode = unicodeFromName ?? storedUnicode;
+
+    if (unicode) {
+      unicode.filter((element) => {
         if (unicodesExisting.includes(element)) {
           throw new Error(`Duplicate unicode - ${element}`);
         }
       });
 
-      unicodesExisting = [...unicodesExisting, ...matches[1].split(',')];
+      unicodesExisting = [...unicodesExisting, ...unicode];
     }
 
     json.push({
       id: file.id,
       svg: file.svg,
       svgFile: svg,
-      name: matches?.[2] ? matcheName : file.name,
+      name: matches && matches[2] ? matcheName : file.name,
       ligature,
-      unicode: matches?.[1] ? matches[1].split(',') : '',
+      unicode: unicode ?? '',
       tags: file.tags,
     });
   });
