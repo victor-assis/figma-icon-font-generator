@@ -12,8 +12,8 @@ export const getSelectedNodes = (): SceneNode[] => {
         const vector =
           'findChildren' in node
             ? (node as unknown as ChildrenMixin).findChildren((child) => {
-                return child.name.includes('ue') || child.name.includes('--');
-              })
+              return child.name.includes('ue') || child.name.includes('--');
+            })
             : [];
         return vector.length ? vector : node;
       } catch {
@@ -79,7 +79,10 @@ export const createIconNode = async (
   let y = margin;
 
   for (const [index, icon] of vectors.entries()) {
-    if (!frameIconsNodeId || (await figma.getNodeByIdAsync(frameIconsNodeId)) === null) {
+    if (
+      !frameIconsNodeId ||
+      (await figma.getNodeByIdAsync(frameIconsNodeId)) === null
+    ) {
       const frame: FrameNode = figma.createFrame();
       frame.visible = false;
       figma.currentPage.appendChild(frame);
@@ -87,18 +90,28 @@ export const createIconNode = async (
       frame.y = figma.viewport.center.y;
       const frameSelectors: FrameNode = frame.clone();
       frameIconsNodeId = frame.id;
-      frameIconsNode = (await figma.getNodeByIdAsync(frameIconsNodeId)) as FrameNode;
+      frameIconsNode = (await figma.getNodeByIdAsync(
+        frameIconsNodeId,
+      )) as FrameNode;
       frameSelectorsNodeId = frameSelectors.id;
-      frameSelectorsNode = (await figma.getNodeByIdAsync(frameSelectorsNodeId)) as FrameNode;
+      frameSelectorsNode = (await figma.getNodeByIdAsync(
+        frameSelectorsNodeId,
+      )) as FrameNode;
 
-      const fills = JSON.parse(JSON.stringify(frameSelectorsNode!.fills)) as Paint[];
+      const fills = JSON.parse(
+        JSON.stringify(frameSelectorsNode!.fills),
+      ) as Paint[];
       if (fills[0]) {
         fills[0] = { ...fills[0], opacity: 0 } as Paint;
       }
       frameSelectorsNode!.fills = fills;
     } else {
-      frameIconsNode = (await figma.getNodeByIdAsync(frameIconsNodeId)) as FrameNode;
-      frameSelectorsNode = (await figma.getNodeByIdAsync(frameSelectorsNodeId!)) as FrameNode;
+      frameIconsNode = (await figma.getNodeByIdAsync(
+        frameIconsNodeId,
+      )) as FrameNode;
+      frameSelectorsNode = (await figma.getNodeByIdAsync(
+        frameSelectorsNodeId!,
+      )) as FrameNode;
     }
 
     frameIconsNode!.visible = true;
@@ -150,7 +163,10 @@ export const createIconNode = async (
     labelLiga.x = frame.width / 2 - labelLiga.width / 2;
     labelLiga.y = labelCode.y + 10;
 
-    const group2 = figma.group([labelName, labelCode, labelLiga], figma.currentPage);
+    const group2 = figma.group(
+      [labelName, labelCode, labelLiga],
+      figma.currentPage,
+    );
     const group = figma.group([glyph], figma.currentPage);
     group.name = 'figma group';
     group2.name = 'Icons Selectors';

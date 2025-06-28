@@ -18,7 +18,7 @@
 	"scripts": {
 		"dev": "npx concurrently --raw \"npm run plugin:dev\" \"npm run ui:dev\"",
 		"build": "npm run plugin:build && npm run ui:build",
-		"lint": "eslint .",
+		"lint": "eslint . --fix",
 		"test": "vitest run",
 		"plugin:tsc": "npx tsc -p plugin/tsconfig.json",
 		"plugin:dev": "npm run esbuild -- watch",
