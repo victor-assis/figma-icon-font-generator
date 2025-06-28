@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 /*
 Define a config for building the plugin UI. Figma requires a single HTML file as an output, so we need to inline every asset and merge everything into a single document.
@@ -18,7 +19,10 @@ export default defineConfig({
     viteSingleFile(),
 
     // Provide the support for SVG
-    svgr()
+    svgr(),
+
+    // Polyfill Node.js modules such as path and fs
+    nodePolyfills({ protocolImports: true, overrides: { fs: 'memfs' } })
   ],
 
   build: {
