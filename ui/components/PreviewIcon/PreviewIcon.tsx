@@ -3,6 +3,7 @@ import Card from '@mui/material/Card';
 import ListItem from '@mui/material/ListItem';
 import { Fragment, ReactElement } from 'react';
 import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
 import ListItemText from '@mui/material/ListItemText';
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../../shared/typings';
@@ -42,7 +43,7 @@ const PreviewIcon = ({
   }
 
   const iconSelect = (file: IJsonType): ReactElement => (
-    <>
+    <Stack spacing={1} sx={{ mt: 1 }}>
       {ligatura && (
         <TextField
           label="Ligature"
@@ -70,7 +71,7 @@ const PreviewIcon = ({
         value={file.tags ?? ''}
         onChange={(e) => onChange(file.id, { tags: e.target.value })}
       />
-    </>
+    </Stack>
   );
 
   return (
@@ -85,7 +86,7 @@ const PreviewIcon = ({
       >
         {fontsFiles?.json?.map((file: IJsonType, index: number) => (
           <Fragment key={index}>
-            <Card sx={{ display: 'flex' }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', p: 1, minWidth: 150 }}>
               <ListItem
                 alignItems="center"
                 sx={{ display: 'block', textAlign: 'center' }}
@@ -96,7 +97,7 @@ const PreviewIcon = ({
                 <ListItemText
                   primary={file.name}
                   secondary={iconSelect(file)}
-                  sx={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  sx={{ textOverflow: 'ellipsis', whiteSpace: 'normal' }}
                   className="icon-info"
                 />
               </ListItem>
