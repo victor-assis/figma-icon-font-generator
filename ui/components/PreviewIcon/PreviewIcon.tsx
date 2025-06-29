@@ -1,7 +1,7 @@
 import List from '@mui/material/List';
 import Card from '@mui/material/Card';
 import ListItem from '@mui/material/ListItem';
-import { Fragment, ReactElement } from 'react';
+import { Fragment, ReactElement, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import ListItemText from '@mui/material/ListItemText';
@@ -19,6 +19,7 @@ const PreviewIcon = ({
   ligatura: boolean;
   onChange: (id: string, data: Partial<IJsonType>) => void;
 }): ReactElement => {
+  const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   if (!style) {
     const head = document.head || document.getElementsByTagName('head')[0];
     style = document.createElement('style');
@@ -68,8 +69,19 @@ const PreviewIcon = ({
         label="Tags"
         variant="outlined"
         size="small"
-        value={file.tags ?? ''}
-        onChange={(e) => onChange(file.id, { tags: e.target.value })}
+        value={tagInputs[file.id] ?? file.tags?.join(',') ?? ''}
+        onChange={(e) => {
+          setTagInputs((prev) => ({ ...prev, [file.id]: e.target.value }));
+        }}
+        onBlur={() => {
+          onChange(file.id, {
+            tags:
+              (tagInputs[file.id] ?? file.tags?.join(',') ?? '')
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean),
+          });
+        }}
       />
     </Stack>
   );
@@ -94,6 +106,9 @@ const PreviewIcon = ({
                 <i className="icon-preview">
                   {file.ligature?.[0] ? file.ligature[0] : file.unicode[0]}
                 </i>
+                {file.ligature?.[0] && (
+                  <span className="ligature-example">{file.ligature[0]}</span>
+                )}
                 <ListItemText
                   primary={file.name}
                   secondary={iconSelect(file)}

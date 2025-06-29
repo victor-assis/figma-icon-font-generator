@@ -7,7 +7,7 @@ export interface IJsonType {
   name: string;
   unicode: string[] | string;
   ligature?: string[] | string;
-  tags?: string;
+  tags?: string[];
 }
 
 export interface IIconInformation {
@@ -26,7 +26,7 @@ export interface ISerializedSVG {
   svg: string;
   unicode?: string[] | string;
   ligature?: string[] | string;
-  tags?: string;
+  tags?: string[];
 }
 
 export interface IFormConfig {
@@ -72,7 +72,7 @@ export interface IIconConfig {
   name: string;
   unicode?: string[] | string;
   ligature?: string[] | string;
-  tags?: string;
+  tags?: string[];
 }
 
 export interface PluginMessage {

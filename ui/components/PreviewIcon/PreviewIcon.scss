@@ -29,3 +29,15 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.ligature-example {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #555;
+  display: block;
+  margin-top: 4px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

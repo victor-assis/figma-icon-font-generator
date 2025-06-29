@@ -61,13 +61,22 @@ export const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
     }
   })();
 
+  const storedTags = (() => {
+    try {
+      const data = node.getPluginData('tags');
+      return data ? JSON.parse(data) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
   return {
     name: matches && matches[2] ? matches[2] : node.name,
     id: node.id,
     svg,
     unicode: unicodeFromName ?? storedUnicode,
     ligature: ligatureFromName ?? storedLigature,
-    tags: node.getPluginData('tags') || undefined,
+    tags: storedTags,
   };
 };
 

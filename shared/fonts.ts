@@ -10,6 +10,7 @@ import {
 } from 'svgicons2svgfont';
 import { commitFileAndOpenPR } from './github';
 import { iconConfigs, iconsStrems, createSvgSymbol } from './fontHelpers';
+import { generateExample } from './generateExample';
 import {
   IFontFormats,
   IFormGithub,
@@ -103,6 +104,10 @@ export const generateFonts = (
         _zip.file(`${optons.fontName}.woff`, woffFontBuffer);
         _zip.file(`${optons.fontName}.woff2`, woff2Font);
         _zip.file(`${optons.fontName}-defs.svg`, symbolSvg);
+
+        generateExample(json, optons.fontName).forEach((f) => {
+          _zip.file(`example/${f.name}`, f.content);
+        });
 
         void _zip.generateAsync({ type: 'blob' }).then((content) => {
           saveAs(content, `${optons.fontName}-${optons.version}.zip`);
