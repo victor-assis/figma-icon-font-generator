@@ -32,17 +32,17 @@ const getPathInfo = (d: string): PathInfo => {
   SvgPath(d)
     .abs()
     .unarc()
-    .iterate((segment) => {
+    .iterate((segment: any) => {
       const code = segment[0];
       if (code === 'M') {
-        startX = segment[1];
-        startY = segment[2];
+        startX = segment[1] as number;
+        startY = segment[2] as number;
         points.push({ x: startX, y: startY });
       } else if (code === 'Z') {
         points.push({ x: startX, y: startY });
       } else {
-        const x = segment[segment.length - 2];
-        const y = segment[segment.length - 1];
+        const x = segment[segment.length - 2] as number;
+        const y = segment[segment.length - 1] as number;
         points.push({ x, y });
       }
     });
@@ -74,11 +74,11 @@ const getPathInfo = (d: string): PathInfo => {
 
 const SvgPathWithReverse = SvgPath as unknown as {
   prototype: {
-    reverse: (this: SvgPath) => SvgPath;
+    reverse: (this: any) => any;
   };
 };
 
-SvgPathWithReverse.prototype.reverse = function (this: SvgPath) {
+SvgPathWithReverse.prototype.reverse = function (this: any) {
   const reversed = SVGPathEditor.reverse(this.toString());
   return SvgPath.from(reversed);
 };
@@ -88,21 +88,21 @@ export const convertEvenOddToNonZero = (
 ): string | Document => {
   const doc =
     typeof svgInput === 'string'
-      ? new DOMParser().parseFromString(svgInput, 'image/svg+xml')
+      ? (new DOMParser().parseFromString(svgInput, 'image/svg+xml') as Document)
       : svgInput;
 
-  const paths = Array.from(doc.getElementsByTagName('path'));
+  const paths = Array.from((doc as Document).getElementsByTagName('path'));
 
   for (const path of paths) {
-    const fillRule = path.getAttribute('fill-rule');
+    const fillRule = (path as Element).getAttribute('fill-rule');
     if (fillRule === 'evenodd') {
-      const d = path.getAttribute('d') ?? '';
+      const d = (path as Element).getAttribute('d') ?? '';
 
       const subpaths = d.match(/M[^M]*/g) ?? [];
       // Parse subpaths to ensure valid path data
-      subpaths.forEach((sp) => parseSVG(sp));
+      subpaths.forEach((sp: string) => parseSVG(sp));
 
-      const infos = subpaths.map((sp) => getPathInfo(sp));
+      const infos = subpaths.map((sp: string) => getPathInfo(sp));
 
       const parents = infos.map(() => -1);
       for (let i = 0; i < infos.length; i++) {
@@ -120,24 +120,24 @@ export const convertEvenOddToNonZero = (
         }
       }
 
-      const newSubpaths = infos.map((info, i) => {
+      const newSubpaths = infos.map((info: PathInfo, i: number) => {
         const parentIndex = parents[i];
         if (parentIndex !== -1) {
           const parent = infos[parentIndex];
           if (info.orientation === parent.orientation) {
-            return SvgPath(info.d).reverse().toString();
+            return (SvgPath(info.d) as any).reverse().toString();
           }
         }
         return info.d;
       });
 
-      path.setAttribute('d', newSubpaths.join(' '));
-      path.setAttribute('fill-rule', 'nonzero');
+      (path as Element).setAttribute('d', newSubpaths.join(' '));
+      (path as Element).setAttribute('fill-rule', 'nonzero');
     }
   }
 
   return typeof svgInput === 'string'
-    ? new XMLSerializer().serializeToString(doc)
+    ? new XMLSerializer().serializeToString(doc as Document)
     : doc;
 };
 
