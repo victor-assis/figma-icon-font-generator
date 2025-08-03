@@ -1,3 +1,4 @@
+import convertEvenOddToNonZero from './convertEvenOddToNonZero';
 import {
   IFormConfig,
   IFormGithub,
@@ -12,8 +13,8 @@ export const getSelectedNodes = (): SceneNode[] => {
         const vector =
           'findChildren' in node
             ? (node as unknown as ChildrenMixin).findChildren((child) => {
-                return child.name.includes('ue') || child.name.includes('--');
-              })
+              return child.name.includes('ue') || child.name.includes('--');
+            })
             : [];
         return vector.length ? vector : node;
       } catch {
@@ -33,6 +34,7 @@ export const serialize = async (node: SceneNode): Promise<ISerializedSVG> => {
 
     const res = await vectorNode.exportAsync({ format: 'SVG' });
     svg = String.fromCharCode.apply(null, Array.from(res));
+    svg = convertEvenOddToNonZero(svg) as string;
     vectorNode.remove();
   } catch (err) {
     console.error(err);

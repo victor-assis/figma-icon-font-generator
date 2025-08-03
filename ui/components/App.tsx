@@ -76,8 +76,8 @@ const App = (): ReactElement => {
                     (changed.ligature &&
                     changed.ligature.toString() !== changed.name
                       ? `--${Array.isArray(changed.ligature)
-                          ? changed.ligature.join(',')
-                          : changed.ligature}`
+                        ? changed.ligature.join(',')
+                        : changed.ligature}`
                       : ''),
                   unicode: changed.unicode,
                   ligature: changed.ligature,
@@ -135,11 +135,10 @@ const App = (): ReactElement => {
     setGithubData(data);
   };
 
-  const callback = (config: any): void => {
-    if (config.name !== 'Error') {
+  const callback = (config: IGeneratedFont | Error): void => {
+    if ('urls' in config) {
       setFontsFiles(config);
       setIcons(config.json);
-
       return;
     }
 
