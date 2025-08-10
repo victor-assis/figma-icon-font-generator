@@ -8,6 +8,7 @@ export interface IJsonType {
   unicode: string[] | string;
   ligature?: string[] | string;
   tags?: string[];
+  inverted?: boolean;
 }
 
 export interface IIconInformation {
@@ -27,6 +28,7 @@ export interface ISerializedSVG {
   unicode?: string[] | string;
   ligature?: string[] | string;
   tags?: string[];
+  inverted?: boolean;
 }
 
 export interface IFormConfig {

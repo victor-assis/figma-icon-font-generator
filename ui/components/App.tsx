@@ -25,6 +25,7 @@ import { generateFonts } from '../../shared/fonts';
 import PreviewIcon from './PreviewIcon/PreviewIcon';
 import { generateVetores } from '../../shared/vetors';
 import './App.scss';
+import invertFillRule from '../../shared/invertFillRule';
 import FormFontConfig from './FormFontConfig/FormFontConfig';
 import GithubIntegration from './githubIntegration/githubIntegration';
 import {
@@ -32,11 +33,12 @@ import {
   IFormGithub,
   IGeneratedFont,
   IJsonType,
+  ISerializedSVG,
 } from '../../shared/typings';
 
 const App = (): ReactElement => {
   const [tabValue, setTabValue] = useState(0);
-  const [icons, setIcons] = useState([]);
+  const [icons, setIcons] = useState<IJsonType[]>([]);
   const [fontsConfig, setFontConfig] = useState<IFormConfig>({
     fontName: 'font-generator',
     fontHeight: '1024',
@@ -92,6 +94,52 @@ const App = (): ReactElement => {
       return { ...prev, json: updated };
     });
   };
+
+  const toggleInvertIcon = (id: string): void => {
+    const updatedIcons = icons.map((icon: IJsonType) => {
+      if (icon.id === id) {
+        const invertedSvg = invertFillRule(icon.svg);
+        const blob = new Blob([invertedSvg], { type: 'image/svg+xml' });
+        const svgFile = new File([blob], `${icon.name}.svg`, {
+          type: 'image/svg+xml',
+        });
+        return { ...icon, svg: invertedSvg, svgFile, inverted: !icon.inverted };
+      }
+      return icon;
+    });
+    setIcons(updatedIcons);
+
+    const serialized = updatedIcons.map((icon): ISerializedSVG => ({
+      id: icon.id,
+      name: icon.name,
+      svg: icon.svg,
+      unicode: icon.unicode,
+      ligature: icon.ligature,
+      tags: icon.tags,
+      inverted: icon.inverted,
+    }));
+
+    generateFonts(
+      serialized,
+      fontsFiles?.optons ?? fontsConfig,
+      hasLigatura,
+      false,
+      (generatedFont) => {
+        if ('urls' in generatedFont) {
+          setFontsFiles(generatedFont);
+          setIcons(generatedFont.json);
+        }
+      },
+    );
+  };
+
+  const applyInversions = (files: ISerializedSVG[]): ISerializedSVG[] =>
+    files.map((file) => {
+      const icon = icons.find((i: IJsonType) => i.id === file.id);
+      return icon?.inverted
+        ? { ...file, svg: invertFillRule(file.svg), inverted: true }
+        : file;
+    });
 
   const onSubmit = (): void => {
     setLoadingGenerate(true);
@@ -193,7 +241,7 @@ const App = (): ReactElement => {
           }
 
           generateFonts(
-            files,
+            applyInversions(files as ISerializedSVG[]),
             msgFontsConfig ?? fontsConfig,
             msgHasLigatura ?? hasLigatura,
             true,
@@ -240,7 +288,7 @@ const App = (): ReactElement => {
           }
 
           generateFonts(
-            files,
+            applyInversions(files as ISerializedSVG[]),
             msgFontsConfig ?? fontsConfig,
             msgHasLigatura ?? hasLigatura,
             false,
@@ -282,7 +330,7 @@ const App = (): ReactElement => {
         setSvgs: () => {
           if (files && files.length > 0) {
             generateFonts(
-              files,
+              applyInversions(files as ISerializedSVG[]),
               msgFontsConfig ?? fontsConfig,
               msgHasLigatura ?? hasLigatura,
               false,
@@ -319,6 +367,7 @@ const App = (): ReactElement => {
           fontsFiles={fontsFiles}
           ligatura={hasLigatura}
           onChange={updateIconData}
+          onInvert={toggleInvertIcon}
         />
       ),
     [fontsFiles, hasLigatura],
