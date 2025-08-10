@@ -9,7 +9,7 @@ const SvgPathWithReverse = SvgPath as unknown as {
 
 SvgPathWithReverse.prototype.reverse = function (this: SvgPath): SvgPath {
   const reversed = SVGPathEditor.reverse(this.toString());
-  return SvgPath.from(reversed);
+  return SvgPath(reversed);
 };
 
 export const invertFillRule = (svg: string): string => {
