@@ -80,6 +80,7 @@ export const iconConfigs = (files: ISerializedSVG[], hasLigatura: boolean) => {
       ligature,
       unicode: unicode ?? '',
       tags: file.tags,
+      inverted: file.inverted,
     });
   });
 
@@ -127,8 +128,8 @@ export const iconsStrems = (json: IJsonType[], download?: boolean) => {
 
     const unicode = Array.isArray(icon.unicode)
       ? icon.unicode.map((curCodepoint) =>
-          String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16)),
-        )
+        String.fromCharCode(parseInt(curCodepoint.replace('u', '0x'), 16)),
+      )
       : [String.fromCharCode(parseInt(icon.unicode.replace('u', '0x')))];
 
     iconStream.metadata = {

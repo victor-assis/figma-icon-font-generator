@@ -1,10 +1,11 @@
-import List from '@mui/material/List';
 import Card from '@mui/material/Card';
-import ListItem from '@mui/material/ListItem';
-import { Fragment, ReactElement, useState } from 'react';
-import TextField from '@mui/material/TextField';
+import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import ListItem from '@mui/material/ListItem';
+import TextField from '@mui/material/TextField';
 import ListItemText from '@mui/material/ListItemText';
+import { Fragment, ReactElement, useState } from 'react';
 import './PreviewIcon.scss';
 import { IGeneratedFont, IJsonType } from '../../../shared/typings';
 
@@ -14,10 +15,12 @@ const PreviewIcon = ({
   fontsFiles,
   ligatura,
   onChange,
+  onInvert,
 }: {
   fontsFiles: IGeneratedFont;
   ligatura: boolean;
   onChange: (id: string, data: Partial<IJsonType>) => void;
+  onInvert: (id: string) => void;
 }): ReactElement => {
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
   if (!style) {
@@ -83,6 +86,13 @@ const PreviewIcon = ({
           });
         }}
       />
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => onInvert(file.id)}
+      >
+        Invert Fill
+      </Button>
     </Stack>
   );
 
